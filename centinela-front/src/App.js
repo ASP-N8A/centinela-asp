@@ -16,7 +16,7 @@ function App() {
         Component2
       </Route>
       <Route exact path="/">
-        {isAuthenticated ? 'Home' : <Spin />}
+        {isAuthenticated ? 'Home' : 'Test pipeline dev'}
       </Route>
       <Route path="/">
         Not found
