@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Switch, Route } from 'react-router-dom';
 import { selectAuthenticated } from './Slices/accountSlice';
 import { Spin } from 'antd';
+import Authentication from './Views/Authentication/Authentication';
 
 function App() {
   const isAuthenticated = useSelector(selectAuthenticated);
@@ -16,7 +17,7 @@ function App() {
         Component2
       </Route>
       <Route exact path="/">
-        {isAuthenticated ? 'Home' : 'Test pipeline dev 2'}
+        {isAuthenticated ? 'Home' : <Authentication />}
       </Route>
       <Route path="/">
         Not found

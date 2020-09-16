@@ -4,5 +4,7 @@ export const theme = {
     secondary: 'white',
     primaryBlue: 'blue',
     secondaryBlue: 'blue',
+    link: '#1890ff',
+    linkActive: '#40a9ff'
   }
 }
