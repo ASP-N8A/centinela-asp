@@ -27,7 +27,9 @@ const SignIn = ({ setForm }) => {
 
   const onFinish = (values) => {
     // TODO: Sign-in endpoint
-    dispatch(login());
+    const { password } = values;
+    const user = { role: password === 'admin' ? 'admin' : 'developer'}
+    dispatch(login(user));
   };
 
   return (
