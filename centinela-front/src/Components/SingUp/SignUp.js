@@ -32,7 +32,9 @@ const SignUp = ({ setForm }) => {
 
   const onFinish = (values) => {
     // TODO: Sign-up endpoint (create organization & user)
-    dispatch(login());
+    const { password } = values;
+    const user = { role: password === 'admin' ? 'admin' : 'developer'}
+    dispatch(login(user));
   };
 
   return (
