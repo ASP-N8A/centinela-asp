@@ -1,55 +1,72 @@
 import React, { useState } from 'react';
-import { Table, Space } from 'antd';
+import { Table, Space, Modal, Form } from 'antd';
 import { useSelector } from 'react-redux';
 
 import { Link } from '../../Components/SingUp/SignUp.styles';
 import { selectUser } from '../../Slices/accountSlice';
+import EdditIssue from '../../Components/EditIssue/EdditIssue';
 
-const data = [
+const initialData = [
   {
-    name: 'Issue 1 with windows size',
+    id: 1,
+    title: 'Issue 1 with windows size',
+    description: 'Desc',
     severity: 3,
     status: 'open',
     developer: 'diego@diego.com',
   },
   {
-    name: 'Issue 2 with windows size',
+    id: 2,
+    title: 'Issue 2 with windows size',
+    description: 'Desc',
     severity: 3,
     status: 'open',
     developer: 'diego@diego.com',
   },
   {
-    name: 'Issue 3 with windows size',
+    id: 3,
+    title: 'Issue 3 with windows size',
+    description: 'Desc',
     severity: 1,
     status: 'open',
     developer: 'diego@diego.com',
   },
   {
-    name: 'Issue 4 with windows size',
+    id: 4,
+    title: 'Issue 4 with windows size',
+    description: 'Desc',
     severity: 2,
     status: 'open',
     developer: null,
   },
   {
-    name: 'Issue 5 with windows size',
+    id: 5,
+    title: 'Issue 5 with windows size',
+    description: 'Desc',
     severity: 4,
     status: 'close',
     developer: null,
   },
   {
-    name: 'Issue 6 with windows size',
+    id: 6,
+    title: 'Issue 6 with windows size',
+    description: 'Desc',
     severity: 4,
     status: 'open',
     developer: null,
   },
   {
-    name: 'Issue 7 with windows size',
+    id: 7,
+    title: 'Issue 7 with windows size',
+    description: 'Desc',
     severity: 3,
     status: 'close',
     developer: null,
   },
   {
-    name: 'Issue 8 with windows size',
+    id: 8,
+    title: 'Issue 8 with windows size',
+    description: 'Desc',
     severity: 2,
     status: 'open',
     developer: null,
@@ -64,16 +81,48 @@ const Issues = () => {
     },
     filteredInfo: undefined,
   });
+  const [isEditVisible, setEditVisible] = useState(false);
+  const [data, setData] = useState(initialData);
+  const [form] = Form.useForm();
 
   const user = useSelector(selectUser);
 
-  console.log('user ', user);
+  const handleClickEdit = (issue) => {
+    setEditVisible(true);
+    form.setFieldsValue(issue);
+  };
+
+  const handleEditIssue = () => {
+    form
+      .validateFields()
+      .then((values) => {
+        console.log('new values ', values);
+        form.resetFields();
+        // TODO: PUT edit issue
+
+        // Function to simulate behaviour
+        const index = data.findIndex(issue => issue.id === values.id);
+        const newData = [...data];
+        newData.splice(index, 1, values);
+        setData(newData);
+
+        setEditVisible(false);
+      })
+      .catch((info) => {
+        console.log('Validate Failed:', info);
+      });
+  };
 
   const columns = [
     {
-      title: 'Name',
-      key: 'name',
-      dataIndex: 'name',
+      title: 'Title',
+      key: 'title',
+      dataIndex: 'title',
+    },
+    {
+      title: 'Description',
+      key: 'description',
+      dataIndex: 'description',
     },
     {
       title: 'Severity',
@@ -107,9 +156,9 @@ const Issues = () => {
     {
       title: 'Action',
       key: 'action',
-      render: (text, record) => (
+      render: (text, issue) => (
         <Space>
-          {user?.role === 'admin' && <Link>Edit</Link>}
+          {user?.role === 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
           <Link>View</Link>
         </Space>
       ),
@@ -125,13 +174,24 @@ const Issues = () => {
   };
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      pagination={{ pageSize: 50 }}
-      scroll={{ y: 550 }}
-      onChange={handleChange}
-    />
+    <>
+      <Table
+        columns={columns}
+        dataSource={data}
+        pagination={{ pageSize: 50 }}
+        scroll={{ y: 550 }}
+        onChange={handleChange}
+      />
+      <Modal
+        title="Edit Issue"
+        visible={isEditVisible}
+        onOk={handleEditIssue}
+        onCancel={() => setEditVisible(false)}
+        okText="Edit"
+      >
+        <EdditIssue form={form} />
+      </Modal>
+    </>
   );
 };
 

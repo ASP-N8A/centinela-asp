@@ -17,7 +17,7 @@ function App() {
         Component2
       </Route>
       <Route exact path="/">
-        {isAuthenticated ? <Issues /> : <Authentication />}
+        {!isAuthenticated ? <Issues /> : <Authentication />}
       </Route>
       <Route path="/">
         Not found
