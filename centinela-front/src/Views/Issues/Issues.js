@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Table, Space, Modal, Form } from 'antd';
 import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import { Link } from '../../Components/SingUp/SignUp.styles';
 import { selectUser } from '../../Slices/accountSlice';
@@ -84,6 +85,7 @@ const Issues = () => {
   const [isEditVisible, setEditVisible] = useState(false);
   const [data, setData] = useState(initialData);
   const [form] = Form.useForm();
+  const history = useHistory();
 
   const user = useSelector(selectUser);
 
@@ -101,7 +103,7 @@ const Issues = () => {
         // TODO: PUT edit issue
 
         // Function to simulate behaviour
-        const index = data.findIndex(issue => issue.id === values.id);
+        const index = data.findIndex((issue) => issue.id === values.id);
         const newData = [...data];
         newData.splice(index, 1, values);
         setData(newData);
@@ -130,6 +132,7 @@ const Issues = () => {
       key: 'severity',
       sorter: (a, b) => b.severity - a.severity,
       sortOrder: info.sortedInfo?.columnKey === 'severity' && info.sortedInfo.order,
+      width: 100,
     },
     {
       title: 'Status',
@@ -147,6 +150,7 @@ const Issues = () => {
       ],
       defaultFilteredValue: ['open'],
       onFilter: (value, issue) => issue.status.indexOf(value) === 0,
+      width: 100,
     },
     {
       title: 'Developer',
@@ -158,8 +162,8 @@ const Issues = () => {
       key: 'action',
       render: (text, issue) => (
         <Space>
-          {user?.role === 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
-          <Link>View</Link>
+          {user?.role !== 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
+          <Link onClick={() => history.push(`/issue/${issue.id}`)}>View</Link>
         </Space>
       ),
       width: 85,
