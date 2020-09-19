@@ -15,7 +15,7 @@ function App() {
         <IssueDetails />
       </Route>
       <Route exact path="/">
-        {!isAuthenticated ? <Issues /> : <Authentication />}
+        {isAuthenticated ? <Issues /> : <Authentication />}
       </Route>
       <Route path="/">Not found</Route>
     </Switch>

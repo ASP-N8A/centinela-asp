@@ -162,7 +162,7 @@ const Issues = () => {
       key: 'action',
       render: (text, issue) => (
         <Space>
-          {user?.role !== 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
+          {user?.role === 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
           <Link onClick={() => history.push(`/issue/${issue.id}`)}>View</Link>
         </Space>
       ),
