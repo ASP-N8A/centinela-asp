@@ -6,6 +6,7 @@ import { useHistory } from 'react-router-dom';
 import { Link } from '../../Components/SingUp/SignUp.styles';
 import { selectUser } from '../../Slices/accountSlice';
 import EdditIssue from '../../Components/EditIssue/EdditIssue';
+import MainLayout from '../../Layouts/MainLayout';
 
 const initialData = [
   {
@@ -178,7 +179,7 @@ const Issues = () => {
   };
 
   return (
-    <>
+    <MainLayout>
       <Table
         columns={columns}
         dataSource={data}
@@ -195,7 +196,7 @@ const Issues = () => {
       >
         <EdditIssue form={form} />
       </Modal>
-    </>
+    </MainLayout>
   );
 };
 

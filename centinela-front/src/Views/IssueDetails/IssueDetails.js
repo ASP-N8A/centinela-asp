@@ -10,6 +10,7 @@ import {
 } from './IssueDetails.styles';
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { theme } from '../../theme';
+import MainLayout from '../../Layouts/MainLayout';
 
 const { Text, Link } = Typography;
 
@@ -87,47 +88,49 @@ const IssueDetails = () => {
   }
 
   return (
-    <Container>
-      <HeaderContainer>
-        <IssueTitle level={4}>{title}</IssueTitle>
-        <Space>
-          {getStatusTag()}
-          {getSeverityTag()}
-        </Space>
-      </HeaderContainer>
-      <Description>{description || 'No description.'}</Description>
-      <DeveloperContainer>
-        <IssueTitle level={5}>Developer:</IssueTitle>
-        <Description>{developer || 'Not assigned.'}</Description>
-      </DeveloperContainer>
-      {status === 'open' ? (
-        <Button type="primary" onClick={handleCloseIssue}>
-          Close Issue
-        </Button>
-      ) : closeRecently ? (
-        <Alert
-          message="Issue status"
-          description={
-            <Text>
-              Issue was succesfully closed, <Link href="/">return to home</Link>
-            </Text>
-          }
-          type="success"
-          showIcon
-        />
-      ) : (
-        <Alert
-          message="Issue status"
-          description={
-            <Text>
-              This issue is already closed, <Link href="/">return to home</Link>
-            </Text>
-          }
-          type="info"
-          showIcon
-        />
-      )}
-    </Container>
+    <MainLayout>
+      <Container>
+        <HeaderContainer>
+          <IssueTitle level={4}>{title}</IssueTitle>
+          <Space>
+            {getStatusTag()}
+            {getSeverityTag()}
+          </Space>
+        </HeaderContainer>
+        <Description>{description || 'No description.'}</Description>
+        <DeveloperContainer>
+          <IssueTitle level={5}>Developer:</IssueTitle>
+          <Description>{developer || 'Not assigned.'}</Description>
+        </DeveloperContainer>
+        {status === 'open' ? (
+          <Button type="primary" onClick={handleCloseIssue}>
+            Close Issue
+          </Button>
+        ) : closeRecently ? (
+          <Alert
+            message="Issue status"
+            description={
+              <Text>
+                Issue was succesfully closed, <Link href="/">return to home</Link>
+              </Text>
+            }
+            type="success"
+            showIcon
+          />
+        ) : (
+          <Alert
+            message="Issue status"
+            description={
+              <Text>
+                This issue is already closed, <Link href="/">return to home</Link>
+              </Text>
+            }
+            type="info"
+            showIcon
+          />
+        )}
+      </Container>
+    </MainLayout>
   );
 };
 
