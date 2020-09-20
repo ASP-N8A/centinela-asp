@@ -28,7 +28,7 @@ const SignIn = ({ setForm }) => {
   const onFinish = (values) => {
     // TODO: Sign-in endpoint
     const { password } = values;
-    const user = { role: password === 'admin' ? 'admin' : 'developer'}
+    const user = { role: password === 'admin' ? 'admin' : 'developer' };
     dispatch(login(user));
   };
 
@@ -46,7 +46,7 @@ const SignIn = ({ setForm }) => {
           <Input />
         </Form.Item>
         <Form.Item name="password" label="Password" rules={[{ required: true }]}>
-          <Input type="password" placeholder="Password" />
+          <Input type="password" />
         </Form.Item>
 
         <Form.Item {...tailLayout}>
