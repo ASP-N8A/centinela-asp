@@ -6,6 +6,7 @@ import Authentication from './Views/Authentication/Authentication';
 import Issues from './Views/Issues/Issues';
 import IssueDetails from './Views/IssueDetails/IssueDetails';
 import Invite from './Views/Invite/Invite';
+import Keys from './Views/Keys/Keys';
 
 function App() {
   const isAuthenticated = useSelector(selectAuthenticated);
@@ -17,6 +18,9 @@ function App() {
       </Route>
       <Route exact path="/invite">
         <Invite />
+      </Route>
+      <Route exact path="/keys">
+        <Keys />
       </Route>
       <Route exact path="/">
         {isAuthenticated ? <Issues /> : <Authentication />}
