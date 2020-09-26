@@ -34,7 +34,7 @@ const MainLayout = ({ children }) => {
           <Menu.Item key="2" onClick={() => history.push('/invite')}>
             Invite
           </Menu.Item>
-          <Menu.Item key="3">Mange keys</Menu.Item>
+          <Menu.Item key="3" onClick={() => history.push('/keys')}>Mange keys</Menu.Item>
           <Menu.Item key="4">Statistics</Menu.Item>
         </Menu>
       </Header>
