@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 const { roles } = require('../config/roles');
 
+const { Types } = mongoose.Schema;
+
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -36,9 +38,9 @@ const userSchema = mongoose.Schema(
       private: true, // used by the toJSON plugin
     },
     organization: {
-      type: String,
+      type: Types.ObjectId,
+      ref: 'Organization',
       required: true,
-      trim: true,
     },
     role: {
       type: String,

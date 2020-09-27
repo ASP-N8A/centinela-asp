@@ -1,13 +1,38 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService } = require('../services');
+const { authService, userService, tokenService, organizationService } = require('../services');
+const { ADMIN_ROLE } = require('../config/roles');
+const { Organization, User } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 const register = catchAsync(async (req, res) => {
-  // Create user
-  const user = await userService.createUser(req.body);
+  const {
+    body: { name, organization, email, password },
+  } = req;
 
-  // Check organization
-  // TODO
+  //  Validate existing organization and user
+  if (await Organization.isNameTaken(organization)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Organization name already created');
+  }
+  if (await User.isEmailTaken(email)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }
+
+  // Create organization
+  const org = await organizationService.createOrganization(organization);
+
+  const userBody = {
+    name,
+    email,
+    password,
+    organization: org._id,
+    role: ADMIN_ROLE,
+  };
+  // Create user
+  const user = await userService.createUser(userBody);
+
+  //  Add user to organization
+  await organizationService.addUserToOrganization(org._id, user._id);
 
   const tokens = await tokenService.generateAuthTokens(user);
   res.status(httpStatus.CREATED).send({ user, tokens });
