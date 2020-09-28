@@ -4,7 +4,7 @@ const { objectId } = require('./custom.validation');
 const createInvitation = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    role: Joi.string().required().valid('user', 'admin'),
+    role: Joi.string().required().valid('developer', 'admin'),
   }),
 };
 
