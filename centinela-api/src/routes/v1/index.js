@@ -4,6 +4,7 @@ const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 const issueRoute = require('./issue.route');
 const invitationRoute = require('./invitation.route');
+const keyRoute = require('./key.route');
 
 const router = express.Router();
 
@@ -12,5 +13,6 @@ router.use('/users', userRoute);
 router.use('/docs', docsRoute);
 router.use('/issues', issueRoute);
 router.use('/invitations', invitationRoute);
+router.use('/keys', keyRoute);
 
 module.exports = router;
