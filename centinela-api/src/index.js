@@ -3,12 +3,23 @@ const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 
-let server;
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
-  logger.info('Connected to MongoDB');
-  server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`);
+const connect = () => mongoose.createConnection(config.mongoose.url, config.mongoose.options);
+
+const connectToMongoDB = () => {
+  const db = connect(config.mongoose.url);
+  db.on('open', () => {
+    logger.info(`Mongoose connection open to ${JSON.stringify(config.mongoose.url)}`);
+    logger.info(`Retorna ${db}`);
+    return db;
   });
+  db.on('error', (err) => {
+    logger.info(`Mongoose connection error: ${err} with connection info ${JSON.stringify(config.mongoose.url)}`);
+    process.exit(0);
+  });
+};
+
+const server = app.listen(config.port, () => {
+  logger.info(`Listening to port ${config.port}`);
 });
 
 const exitHandler = () => {
@@ -36,3 +47,5 @@ process.on('SIGTERM', () => {
     server.close();
   }
 });
+
+exports.mongodb = connectToMongoDB();
