@@ -2,10 +2,15 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { invitationService } = require('../services');
+const { invitationService, emailService } = require('../services');
 
 const createInvitation = catchAsync(async (req, res) => {
   const invitation = await invitationService.createInvitation(req.body);
+  emailService.sendEmail(
+    req.body.email,
+    'Invitation to join organization',
+    'Join our organization through the link: http://centinela-frontend-dev.s3-website-us-east-1.amazonaws.com'
+  );
   res.status(httpStatus.CREATED).send(invitation);
 });
 
