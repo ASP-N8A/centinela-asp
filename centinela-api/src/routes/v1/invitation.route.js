@@ -8,7 +8,7 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageInvitations'), validate(invitationValidation.createInvitation), invitationController.createInvitation)
+  .post(validate(invitationValidation.createInvitation), invitationController.createInvitation)
   .get(auth('manageInvitations'), validate(invitationValidation.getInvitations), invitationController.getInvitations);
 
 router.route('/:invitationId').get(validate(invitationValidation.getInvitation), invitationController.getInvitation);
