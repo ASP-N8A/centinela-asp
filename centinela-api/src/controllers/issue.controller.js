@@ -29,9 +29,15 @@ const updateIssue = catchAsync(async (req, res) => {
   res.send(issue);
 });
 
+const getCritical = catchAsync(async (req, res) => {
+  const issue = await issueService.getCritical();
+  res.send(issue);
+});
+
 module.exports = {
   createIssue,
   getIssues,
   getIssue,
   updateIssue,
+  getCritical,
 };

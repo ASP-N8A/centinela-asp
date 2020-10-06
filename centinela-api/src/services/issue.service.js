@@ -1,6 +1,9 @@
 const httpStatus = require('http-status');
+const NodeCache = require('node-cache');
 const { Issue } = require('../models');
 const ApiError = require('../utils/ApiError');
+
+const myCache = new NodeCache({ stdTTL: 60 });
 
 const createIssue = async (issueBody) => {
   const issue = await Issue.create(issueBody);
@@ -35,9 +38,24 @@ const updateIssueById = async (issueId, updateBody) => {
   return issue;
 };
 
+const getCritical = async () => {
+  let issues = myCache.get('issues');
+  if (issues === undefined) {
+    issues = await Issue.find({ status: 'open' });
+    issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
+    issues = issues.slice(0, 5);
+    myCache.set('issues', issues);
+    issues.push('B');
+    return issues;
+  }
+  issues.push('A');
+  return issues;
+};
+
 module.exports = {
   createIssue,
   queryIssues,
   getIssueById,
   updateIssueById,
+  getCritical,
 };
