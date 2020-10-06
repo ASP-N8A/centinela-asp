@@ -1,8 +1,10 @@
 const httpStatus = require('http-status');
-const { Issue } = require('../models');
+const { IssueSchema } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { getModelByTenant } = require('../models/util');
 
-const createIssue = async (issueBody) => {
+const createIssue = async (issueBody, orgId) => {
+  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
   const issue = await Issue.create(issueBody);
   return issue;
 };
@@ -16,17 +18,19 @@ const createIssue = async (issueBody) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryIssues = async (filter, options) => {
+const queryIssues = async (filter, options, orgId) => {
+  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
   const issues = await Issue.paginate(filter, options);
   return issues;
 };
 
-const getIssueById = async (id) => {
+const getIssueById = async (id, orgId) => {
+  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
   return Issue.findById(id);
 };
 
-const updateIssueById = async (issueId, updateBody) => {
-  const issue = await getIssueById(issueId);
+const updateIssueById = async (issueId, updateBody, orgId) => {
+  const issue = await getIssueById(issueId, orgId);
   if (!issue) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Issue not found');
   }

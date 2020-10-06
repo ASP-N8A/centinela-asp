@@ -1,4 +1,5 @@
-const { Invitation } = require('../models');
+const { InvitationSchema } = require('../models');
+const { getModelByTenant } = require('../models/util');
 
 /**
  * Create an invitation
@@ -6,7 +7,8 @@ const { Invitation } = require('../models');
  * @returns {Promise<Invitation>}
  */
 
-const createInvitation = async (invitationBody) => {
+const createInvitation = async (invitationBody, orgId) => {
+  const Invitation = getModelByTenant(orgId, 'Invitation', InvitationSchema);
   const invitation = await Invitation.create(invitationBody);
   return invitation;
 };
@@ -16,7 +18,8 @@ const createInvitation = async (invitationBody) => {
  * @param {ObjectId} id
  * @returns {Promise<Invitation>}
  */
-const getInvitationById = async (id) => {
+const getInvitationById = async (id, orgId) => {
+  const Invitation = getModelByTenant(orgId, 'Invitation', InvitationSchema);
   return Invitation.findById(id);
 };
 
@@ -29,7 +32,8 @@ const getInvitationById = async (id) => {
  * @param {number} [options.page] - Current page (default = 1)
  * @returns {Promise<QueryResult>}
  */
-const queryInvitations = async (filter, options) => {
+const queryInvitations = async (filter, options, orgId) => {
+  const Invitation = getModelByTenant(orgId, 'Invitation', InvitationSchema);
   const invitations = await Invitation.paginate(filter, options);
   return invitations;
 };
