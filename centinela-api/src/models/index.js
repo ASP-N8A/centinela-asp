@@ -1,6 +1,9 @@
+//  MODELS
 module.exports.Token = require('./token.model');
-module.exports.User = require('./user.model');
-module.exports.Issue = require('./issue.model');
 module.exports.Organization = require('./organization.model');
-module.exports.Invitation = require('./invitation.model');
 module.exports.Key = require('./key.model');
+
+//  SCHEMAS
+module.exports.UserSchema = require('./user.schema');
+module.exports.IssueSchema = require('./issue.schema');
+module.exports.InvitationSchema = require('./invitation.schema');

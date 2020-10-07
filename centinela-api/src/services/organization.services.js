@@ -27,6 +27,15 @@ const getOrganizationById = async (id) => {
 };
 
 /**
+ * Get organization by name
+ * @param {String} name
+ * @returns {Promise<Organization>}
+ */
+const getOrganizationByName = async (name) => {
+  return Organization.findOne({ name });
+};
+
+/**
  * Add user to organization
  * @param {ObjectId} orgId - user id to add
  * @param {ObjectId} userId - user id to add
@@ -44,4 +53,5 @@ const addUserToOrganization = async (orgId, userId) => {
 module.exports = {
   createOrganization,
   addUserToOrganization,
+  getOrganizationByName,
 };

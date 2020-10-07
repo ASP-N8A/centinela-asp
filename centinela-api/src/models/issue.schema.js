@@ -38,9 +38,4 @@ const issueSchema = mongoose.Schema(
 issueSchema.plugin(toJSON);
 issueSchema.plugin(paginate);
 
-/**
- * @typedef Issue
- */
-const Issue = mongoose.model('Issue', issueSchema);
-
-module.exports = Issue;
+module.exports = issueSchema;

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
-const { roles } = require('../config/roles');
+const { roles, DEVELOPER_ROLE } = require('../config/roles');
 
 const invitationSchema = mongoose.Schema({
   email: {
@@ -19,13 +19,11 @@ const invitationSchema = mongoose.Schema({
   role: {
     type: String,
     enum: roles,
-    default: 'developer',
+    default: DEVELOPER_ROLE,
   },
 });
 
 invitationSchema.plugin(toJSON);
 invitationSchema.plugin(paginate);
 
-const Invitation = mongoose.model('Invitation', invitationSchema);
-
-module.exports = Invitation;
+module.exports = invitationSchema;
