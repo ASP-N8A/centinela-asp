@@ -1,26 +1,12 @@
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const { Types } = mongoose.Schema;
-
 const organizationSchema = mongoose.Schema({
   name: {
     type: String,
     requiered: true,
     trim: true,
   },
-  issues: [
-    {
-      type: Types.ObjectId,
-      ref: 'Issue',
-    },
-  ],
-  users: [
-    {
-      type: Types.ObjectId,
-      ref: 'User',
-    },
-  ],
 });
 
 organizationSchema.plugin(toJSON);

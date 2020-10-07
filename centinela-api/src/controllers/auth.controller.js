@@ -1,38 +1,61 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userService, tokenService, organizationService } = require('../services');
+const { authService, userService, tokenService, organizationService, invitationService } = require('../services');
 const { ADMIN_ROLE } = require('../config/roles');
-const { Organization, User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
+/**
+ * Register organization and user
+ */
 const register = catchAsync(async (req, res) => {
   const {
     body: { name, organization, email, password },
   } = req;
 
-  //  Validate existing organization and user
-  if (await Organization.isNameTaken(organization)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Organization name already created');
-  }
-  if (await User.isEmailTaken(email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
-  }
-
-  // Create organization
+  //  Create organization
   const org = await organizationService.createOrganization(organization);
 
+  // Create user
   const userBody = {
     name,
     email,
     password,
-    organization: org._id,
     role: ADMIN_ROLE,
   };
-  // Create user
-  const user = await userService.createUser(userBody);
+  const user = await userService.createUser(userBody, org._id);
 
-  //  Add user to organization
-  await organizationService.addUserToOrganization(org._id, user._id);
+  const tokens = await tokenService.generateAuthTokens(user);
+  res.status(httpStatus.CREATED).send({ user, tokens });
+});
+
+/**
+ * Register user from invite
+ */
+const registerUser = catchAsync(async (req, res) => {
+  const {
+    body: { name, email, password, invitationId, organization },
+  } = req;
+
+  //  Validate existing invitation
+  const invitation = await invitationService.getInvitationById(invitationId, organization);
+  if (!invitation || invitation.email !== email) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation');
+  }
+
+  //  Validate existing organization
+  const org = await organizationService.getOrganizationById(organization);
+  if (!org) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation - Organization does not exist');
+  }
+
+  // Create user
+  const userBody = {
+    name,
+    email,
+    password,
+    role: invitation.role,
+  };
+  const user = await userService.createUser(userBody, org._id);
 
   const tokens = await tokenService.generateAuthTokens(user);
   res.status(httpStatus.CREATED).send({ user, tokens });
@@ -57,6 +80,7 @@ const refreshTokens = catchAsync(async (req, res) => {
 
 module.exports = {
   register,
+  registerUser,
   login,
   logout,
   refreshTokens,

@@ -10,6 +10,16 @@ const register = {
   }),
 };
 
+const registerUser = {
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required().custom(password),
+    name: Joi.string().required(),
+    organization: Joi.string().required(),
+    invitationId: Joi.string().required(),
+  }),
+};
+
 const login = {
   body: Joi.object().keys({
     email: Joi.string().required(),
@@ -46,6 +56,7 @@ const resetPassword = {
 
 module.exports = {
   register,
+  registerUser,
   login,
   logout,
   refreshTokens,
