@@ -40,6 +40,11 @@ const userSchema = mongoose.Schema(
       enum: roles,
       default: 'developer',
     },
+    organization: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'Organization',
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -79,4 +84,9 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-module.exports = userSchema;
+/**
+ * @typedef User
+ */
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
