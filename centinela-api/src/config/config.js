@@ -1,6 +1,7 @@
 const dotenv = require('dotenv');
 const path = require('path');
 const Joi = require('@hapi/joi');
+const fs = require('fs');
 
 dotenv.config({ path: path.join(__dirname, '../../.env') });
 
@@ -35,6 +36,7 @@ module.exports = {
       useCreateIndex: true,
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      sslCA: [fs.readFileSync('rds-combined-ca-bundle.pem')],
     },
   },
   jwt: {
