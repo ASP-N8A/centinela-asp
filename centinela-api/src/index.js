@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
+const path = require('path');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
+const { invitationEmailQueue } = require('./queue');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
+
+  invitationEmailQueue.process(path.resolve(process.cwd(), 'src/queue', 'sendEmailProcessor.js'));
+
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });
