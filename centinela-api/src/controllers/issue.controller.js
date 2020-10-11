@@ -45,7 +45,20 @@ const updateIssue = catchAsync(async (req, res) => {
 });
 
 const getCritical = catchAsync(async (req, res) => {
-  const issue = await issueService.getCritical();
+  const accessKey = req.headers['access-key'];
+  if (!accessKey) {
+    throw new ApiError(
+      httpStatus.UNAUTHORIZED,
+      'In order to see the issues you must provide the organization key in the Headers'
+    );
+  }
+
+  const { orgId } = jwt.verify(accessKey, config.jwt.secret);
+  if (!orgId) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Access key not valid');
+  }
+
+  const issue = await issueService.getCritical(orgId);
   res.send(issue);
 });
 
