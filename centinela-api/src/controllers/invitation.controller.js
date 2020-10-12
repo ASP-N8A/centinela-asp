@@ -2,16 +2,21 @@ const httpStatus = require('http-status');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { invitationService } = require('../services');
+const { invitationService, organizationService } = require('../services');
 const { invitationEmailQueue } = require('../queue');
+const { parseAuthToken } = require('../utils/parseAuthToken');
 
 const createInvitation = catchAsync(async (req, res) => {
-  const invitation = await invitationService.createInvitation(req.body);
-  // TODO. No mandar email si la invitation falla (ej. cuando se usa un email que ya fue invitado o ya tiene cuenta con otra organizacion)
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
+  const invitation = await invitationService.createInvitation(req.body, org);
+  const { name: orgName } = await organizationService.getOrganizationById(org);
+
   const data = {
     to: req.body.email,
     subject: 'Invitation to join organization',
-    text: 'Join our organization through the link: http://centinela-frontend-dev.s3-website-us-east-1.amazonaws.com',
+    text: `Join our organization through the link: http://centinela-frontend-dev.s3-website-us-east-1.amazonaws.com/?company=${orgName}&token=${invitation._id}`,
   };
   invitationEmailQueue.add(data);
   res.status(httpStatus.CREATED).send(invitation);

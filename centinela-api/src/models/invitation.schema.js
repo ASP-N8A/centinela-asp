@@ -3,6 +3,8 @@ const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 const { roles, DEVELOPER_ROLE } = require('../config/roles');
 
+const status = ['pending', 'accepted'];
+
 const invitationSchema = mongoose.Schema({
   email: {
     type: String,
@@ -20,6 +22,11 @@ const invitationSchema = mongoose.Schema({
     type: String,
     enum: roles,
     default: DEVELOPER_ROLE,
+  },
+  status: {
+    type: String,
+    enum: status,
+    default: status[0],
   },
 });
 

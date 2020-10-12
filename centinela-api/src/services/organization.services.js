@@ -52,6 +52,7 @@ const addUserToOrganization = async (orgId, userId) => {
 
 module.exports = {
   createOrganization,
+  getOrganizationById,
   addUserToOrganization,
   getOrganizationByName,
 };
