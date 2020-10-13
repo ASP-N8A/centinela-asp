@@ -1,5 +1,7 @@
-const { InvitationSchema } = require('../models');
+const httpStatus = require('http-status');
+const { InvitationSchema, User } = require('../models');
 const { getModelByTenant } = require('../models/util');
+const ApiError = require('../utils/ApiError');
 
 /**
  * Create an invitation
@@ -8,7 +10,15 @@ const { getModelByTenant } = require('../models/util');
  */
 
 const createInvitation = async (invitationBody, orgId) => {
+  if (await User.isEmailTaken(invitationBody.email)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
+  }
+
   const Invitation = getModelByTenant(orgId, 'Invitation', InvitationSchema);
+  if (await Invitation.findOne({ email: invitationBody.email })) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User has already been invited');
+  }
+
   const invitation = await Invitation.create(invitationBody);
   return invitation;
 };
@@ -38,8 +48,20 @@ const queryInvitations = async (filter, options, orgId) => {
   return invitations;
 };
 
+const updateInvitation = async (invitationId, orgId, updateBody) => {
+  const invitation = await getInvitationById(invitationId, orgId);
+  if (!invitation) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Invitation not found');
+  }
+
+  Object.assign(invitation, updateBody);
+  await invitation.save();
+  return invitation;
+};
+
 module.exports = {
   createInvitation,
   getInvitationById,
   queryInvitations,
+  updateInvitation,
 };

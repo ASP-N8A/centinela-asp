@@ -1,5 +1,5 @@
 const Joi = require('@hapi/joi');
-const { password } = require('./custom.validation');
+const { password, objectId } = require('./custom.validation');
 
 const register = {
   body: Joi.object().keys({
@@ -16,7 +16,7 @@ const registerUser = {
     password: Joi.string().required().custom(password),
     name: Joi.string().required(),
     organization: Joi.string().required(),
-    invitationId: Joi.string().required(),
+    invitationId: Joi.string().required().custom(objectId),
   }),
 };
 
