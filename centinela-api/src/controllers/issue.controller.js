@@ -22,6 +22,8 @@ const createIssue = catchAsync(async (req, res) => {
   }
 
   const issue = await issueService.createIssue(req.body, orgId);
+
+  // TODO: Mandar mail a todos los usuarios de la organizacion
   res.status(httpStatus.CREATED).send(issue);
 });
 
