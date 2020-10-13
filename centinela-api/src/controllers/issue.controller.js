@@ -5,6 +5,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { issueService } = require('../services');
 const config = require('../config/config');
+const { parseAuthToken } = require('../utils/parseAuthToken');
 
 const createIssue = catchAsync(async (req, res) => {
   const accessKey = req.headers['access-key'];
@@ -21,6 +22,8 @@ const createIssue = catchAsync(async (req, res) => {
   }
 
   const issue = await issueService.createIssue(req.body, orgId);
+
+  // TODO: Mandar mail a todos los usuarios de la organizacion
   res.status(httpStatus.CREATED).send(issue);
 });
 
@@ -40,7 +43,9 @@ const getIssue = catchAsync(async (req, res) => {
 });
 
 const updateIssue = catchAsync(async (req, res) => {
-  const issue = await issueService.updateIssueById(req.params.issueId, req.body);
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+  const issue = await issueService.updateIssueById(req.params.issueId, req.body, org);
   res.send(issue);
 });
 

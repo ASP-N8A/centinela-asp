@@ -4,9 +4,9 @@ const { Key } = require('../models');
 const config = require('../config/config');
 
 const createKey = async (keyBody) => {
-  const { name, orgId } = keyBody;
+  const { name, org } = keyBody;
   const payload = {
-    orgId,
+    orgId: org,
     name,
   };
   const token = jwt.sign(payload, config.jwt.secret);
