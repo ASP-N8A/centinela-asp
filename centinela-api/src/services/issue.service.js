@@ -1,10 +1,11 @@
 const httpStatus = require('http-status');
-const NodeCache = require('node-cache');
+const redis = require('redis');
 const { IssueSchema } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getModelByTenant } = require('../models/util');
+const config = require('../config/config');
 
-const myCache = new NodeCache({ stdTTL: 60 });
+const client = redis.createClient({ port: config.redis.port, host: config.redis.host, password: config.redis.password });
 
 const createIssue = async (issueBody, orgId) => {
   const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
@@ -43,13 +44,19 @@ const updateIssueById = async (issueId, updateBody, orgId) => {
 };
 
 const getCritical = async (orgId) => {
-  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
-  let issues = myCache.get(orgId);
+  let issues;
+  client.get(orgId, (err, value) => {
+    if (value) {
+      issues = value;
+    }
+  });
+
   if (issues === undefined) {
+    const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
     issues = await Issue.find({ status: 'open' });
     issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
     issues = issues.slice(0, 5);
-    myCache.set(orgId, issues);
+    client.set(orgId, issues);
     return issues;
   }
   return issues;
