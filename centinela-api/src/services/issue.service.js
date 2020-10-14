@@ -1,11 +1,13 @@
 const httpStatus = require('http-status');
 const redis = require('redis');
+const { promisify } = require('util');
 const { IssueSchema } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getModelByTenant } = require('../models/util');
 const config = require('../config/config');
 
 const client = redis.createClient({ port: config.redis.port, host: config.redis.host, password: config.redis.password });
+const GET_ASYNC = promisify(client.get).bind(client);
 
 const createIssue = async (issueBody, orgId) => {
   const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
@@ -44,20 +46,18 @@ const updateIssueById = async (issueId, updateBody, orgId) => {
 };
 
 const getCritical = async (orgId) => {
-  let issues;
-  client.get(orgId, (err, value) => {
-    if (value) {
-      issues = value;
-    }
-  });
+  const reply = await GET_ASYNC(orgId);
+  if (reply) {
+    return JSON.parse(reply);
+  }
 
-  if (issues === undefined) {
-    const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
-    issues = await Issue.find({ status: 'open' });
-    issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
-    issues = issues.slice(0, 5);
-    client.set(orgId, issues);
-    return issues;
+  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
+  let issues = await Issue.find({ status: 'open' });
+  issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
+  issues = issues.slice(0, 5);
+  if (issues !== '') {
+    client.set(orgId, JSON.stringify(issues));
+    client.expire(orgId, 60);
   }
   return issues;
 };
