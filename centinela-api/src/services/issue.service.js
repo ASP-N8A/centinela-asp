@@ -1,10 +1,13 @@
 const httpStatus = require('http-status');
-const NodeCache = require('node-cache');
+const redis = require('redis');
+const { promisify } = require('util');
 const { IssueSchema } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getModelByTenant } = require('../models/util');
+const config = require('../config/config');
 
-const myCache = new NodeCache({ stdTTL: 60 });
+const client = redis.createClient({ port: config.redis.port, host: config.redis.host, password: config.redis.password });
+const GET_ASYNC = promisify(client.get).bind(client);
 
 const createIssue = async (issueBody, orgId) => {
   const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
@@ -43,14 +46,18 @@ const updateIssueById = async (issueId, updateBody, orgId) => {
 };
 
 const getCritical = async (orgId) => {
+  const reply = await GET_ASYNC(orgId);
+  if (reply) {
+    return JSON.parse(reply);
+  }
+
   const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
-  let issues = myCache.get(orgId);
-  if (issues === undefined) {
-    issues = await Issue.find({ status: 'open' });
-    issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
-    issues = issues.slice(0, 5);
-    myCache.set(orgId, issues);
-    return issues;
+  let issues = await Issue.find({ status: 'open' });
+  issues.sort((a, b) => (a.severity > b.severity ? 1 : -1));
+  issues = issues.slice(0, 5);
+  if (issues !== '') {
+    client.set(orgId, JSON.stringify(issues));
+    client.expire(orgId, 60);
   }
   return issues;
 };
