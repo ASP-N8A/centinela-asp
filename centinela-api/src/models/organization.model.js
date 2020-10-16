@@ -7,6 +7,11 @@ const organizationSchema = mongoose.Schema({
     requiered: true,
     trim: true,
   },
+  users: {
+    type: [String],
+    required: true,
+    unique: true,
+  },
 });
 
 organizationSchema.plugin(toJSON);

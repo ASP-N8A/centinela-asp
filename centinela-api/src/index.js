@@ -3,13 +3,15 @@ const path = require('path');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const { invitationEmailQueue } = require('./queue');
+const { invitationEmailQueue, issueEmailQueue } = require('./queue');
+const sendIssueProcessor = require('./queue/sendIssueProcessor');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
 
   invitationEmailQueue.process(path.resolve(process.cwd(), 'src/queue', 'sendEmailProcessor.js'));
+  issueEmailQueue.process(sendIssueProcessor);
 
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
