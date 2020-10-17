@@ -10,7 +10,7 @@ const { User } = require('../models');
  */
 const register = catchAsync(async (req, res) => {
   const {
-    body: { name, organization, email, password },
+    body: { name, organization: orgName, email, password },
   } = req;
 
   if (await User.isEmailTaken(email)) {
@@ -18,7 +18,7 @@ const register = catchAsync(async (req, res) => {
   }
 
   // Create organization
-  const org = await organizationService.createOrganization(organization);
+  const org = await organizationService.createOrganization(orgName, email);
 
   // Create user
   const userBody = {
@@ -67,6 +67,7 @@ const registerUser = catchAsync(async (req, res) => {
 
   const user = await userService.createUser(userBody, org._id);
   await invitationService.updateInvitation(invitationId, org._id, { status: 'accepted' });
+  await organizationService.addUserToOrganization(org._id, email);
 
   const tokens = await tokenService.generateAuthTokens(user);
   res.status(httpStatus.CREATED).send({ user, tokens });

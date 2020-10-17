@@ -6,6 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const { issueService } = require('../services');
 const config = require('../config/config');
 const { parseAuthToken } = require('../utils/parseAuthToken');
+const { issueEmailQueue } = require('../queue');
 
 const createIssue = catchAsync(async (req, res) => {
   const accessKey = req.headers['access-key'];
@@ -22,8 +23,8 @@ const createIssue = catchAsync(async (req, res) => {
   }
 
   const issue = await issueService.createIssue(req.body, orgId);
+  await issueEmailQueue.add({ orgId, issueId: issue._id });
 
-  // TODO: Mandar mail a todos los usuarios de la organizacion
   res.status(httpStatus.CREATED).send(issue);
 });
 

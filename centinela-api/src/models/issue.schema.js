@@ -11,6 +11,7 @@ const issueSchema = mongoose.Schema(
     description: {
       type: String,
       trim: true,
+      default: 'No description',
     },
     severity: {
       type: Number,
@@ -19,6 +20,7 @@ const issueSchema = mongoose.Schema(
           throw new Error('Severity must be a number from 1 to 4');
         }
       },
+      default: 4,
     },
     developer: {
       type: String,
