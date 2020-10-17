@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const { InvitationSchema, User } = require('../models');
 const { getModelByTenant } = require('../models/util');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 /**
  * Create an invitation
@@ -11,11 +12,13 @@ const ApiError = require('../utils/ApiError');
 
 const createInvitation = async (invitationBody, orgId) => {
   if (await User.isEmailTaken(invitationBody.email)) {
+    logger.info(`Invitation for ${invitationBody.email} could not be created because the email is already in use`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
   }
 
   const Invitation = getModelByTenant(orgId, 'Invitation', InvitationSchema);
   if (await Invitation.findOne({ email: invitationBody.email })) {
+    logger.info(`Invitation for ${invitationBody.email} could not be created because the use has already been invited`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'User has already been invited');
   }
 

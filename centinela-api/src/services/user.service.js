@@ -1,11 +1,14 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 const createUser = async (userBody, orgId) => {
   if (await User.isEmailTaken(userBody.email)) {
+    logger.info(`${userBody.email} tried to sign up but ${userBody.email} is taken`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
   }
+
   const user = await User.create({ ...userBody, organization: orgId });
   return user;
 };

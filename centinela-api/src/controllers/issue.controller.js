@@ -6,10 +6,12 @@ const catchAsync = require('../utils/catchAsync');
 const { issueService } = require('../services');
 const config = require('../config/config');
 const { parseAuthToken } = require('../utils/parseAuthToken');
+const logger = require('../config/logger');
 
 const createIssue = catchAsync(async (req, res) => {
   const accessKey = req.headers['access-key'];
   if (!accessKey) {
+    logger.info('Issue could not be created because there was no key provided');
     throw new ApiError(
       httpStatus.UNAUTHORIZED,
       'In order to create an issue for your organization you must provide the key in the Headers'
@@ -18,6 +20,7 @@ const createIssue = catchAsync(async (req, res) => {
 
   const { orgId } = jwt.verify(accessKey, config.jwt.secret);
   if (!orgId) {
+    logger.info('Issue could not be created because the key was invalid');
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Access key not valid');
   }
 

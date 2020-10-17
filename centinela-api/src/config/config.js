@@ -64,4 +64,7 @@ module.exports = {
     port: envVars.REDIS_PORT,
     password: envVars.REDIS_PASSWORD,
   },
+  logger: {
+    dsn: envVars.SENTRY_DSN,
+  },
 };

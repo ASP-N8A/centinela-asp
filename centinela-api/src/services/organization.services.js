@@ -1,14 +1,16 @@
 const httpStatus = require('http-status');
 const { Organization } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 /**
  * Create an organization
  * @param {String} name
  * @returns {Promise<Organization>}
  */
-const createOrganization = async (name) => {
+const createOrganization = async (email, name) => {
   if (await Organization.isNameTaken(name)) {
+    logger.info(`${email} tried to create organization ${name} but the name is taken`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Organization name already created');
   }
 
