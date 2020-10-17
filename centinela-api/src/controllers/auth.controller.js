@@ -10,12 +10,12 @@ const logger = require('../config/logger');
  */
 const register = catchAsync(async (req, res) => {
   const {
-    body: { name, organization, email, password },
+    body: { name, organization: orgName, email, password },
   } = req;
 
   // Create organization
-  const org = await organizationService.createOrganization(email, organization);
-  logger.info(`Organization ${organization} created by ${email}`);
+  const org = await organizationService.createOrganization(orgName, email);
+  logger.info(`Organization ${orgName} created by ${email}`);
 
   // Create user
   const userBody = {
@@ -63,6 +63,7 @@ const registerUser = catchAsync(async (req, res) => {
 
   const user = await userService.createUser(userBody, org._id);
   await invitationService.updateInvitation(invitationId, org._id, { status: 'accepted' });
+  await organizationService.addUserToOrganization(org._id, email);
 
   const tokens = await tokenService.generateAuthTokens(user);
   logger.info(`User ${email} registered by invitation`);

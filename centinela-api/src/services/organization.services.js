@@ -8,13 +8,14 @@ const logger = require('../config/logger');
  * @param {String} name
  * @returns {Promise<Organization>}
  */
-const createOrganization = async (email, name) => {
+
+const createOrganization = async (name, user) => {
   if (await Organization.isNameTaken(name)) {
-    logger.info(`${email} tried to create organization ${name} but the name is taken`);
+    logger.info(`${user} tried to create organization ${name} but the name is taken`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Organization name already created');
   }
 
-  const organization = await Organization.create({ name });
+  const organization = await Organization.create({ name, users: [user] });
 
   return organization;
 };
@@ -40,15 +41,15 @@ const getOrganizationByName = async (name) => {
 /**
  * Add user to organization
  * @param {ObjectId} orgId - user id to add
- * @param {ObjectId} userId - user id to add
+ * @param {String} user - user email to add
  * @returns {Promise<Organization>}
  */
-const addUserToOrganization = async (orgId, userId) => {
+const addUserToOrganization = async (orgId, user) => {
   const organization = await getOrganizationById(orgId);
   if (!organization) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found');
   }
-  organization.users.push(userId);
+  organization.users.push(user);
   await organization.save();
 };
 

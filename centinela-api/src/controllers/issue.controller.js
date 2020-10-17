@@ -7,6 +7,7 @@ const { issueService } = require('../services');
 const config = require('../config/config');
 const { parseAuthToken } = require('../utils/parseAuthToken');
 const logger = require('../config/logger');
+const { issueEmailQueue } = require('../queue');
 
 const createIssue = catchAsync(async (req, res) => {
   const accessKey = req.headers['access-key'];
@@ -25,15 +26,19 @@ const createIssue = catchAsync(async (req, res) => {
   }
 
   const issue = await issueService.createIssue(req.body, orgId);
+  await issueEmailQueue.add({ orgId, issueId: issue._id });
 
-  // TODO: Mandar mail a todos los usuarios de la organizacion
   res.status(httpStatus.CREATED).send(issue);
 });
 
 const getIssues = catchAsync(async (req, res) => {
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
   const filter = pick(req.query, ['status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await issueService.queryIssues(filter, options);
+
+  const result = await issueService.queryIssues(filter, options, org);
   res.send(result);
 });
 
