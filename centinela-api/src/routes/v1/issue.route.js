@@ -9,7 +9,7 @@ const router = express.Router();
 router
   .route('/')
   .post(validate(issueValidation.createIssue), issueController.createIssue)
-  .get(validate(issueValidation.getIssues), issueController.getIssues);
+  .get(auth('basic'), validate(issueValidation.getIssues), issueController.getIssues);
 
 router.route('/critical').get(validate(issueValidation.getIssues), issueController.getCritical);
 

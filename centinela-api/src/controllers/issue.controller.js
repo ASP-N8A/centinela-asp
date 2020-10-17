@@ -29,9 +29,13 @@ const createIssue = catchAsync(async (req, res) => {
 });
 
 const getIssues = catchAsync(async (req, res) => {
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
   const filter = pick(req.query, ['status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await issueService.queryIssues(filter, options);
+
+  const result = await issueService.queryIssues(filter, options, org);
   res.send(result);
 });
 
