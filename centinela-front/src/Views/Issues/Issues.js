@@ -2,78 +2,14 @@ import React, { useState } from 'react';
 import { Table, Space, Modal, Form } from 'antd';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import { usePaginatedQuery } from 'react-query';
 
 import { Link } from '../../Components/SingUp/SignUp.styles';
 import { selectUser } from '../../Slices/accountSlice';
 import EdditIssue from '../../Components/EditIssue/EdditIssue';
 import MainLayout from '../../Layouts/MainLayout';
 
-const initialData = [
-  {
-    id: 1,
-    title: 'Issue 1 with windows size',
-    description: 'Desc',
-    severity: 3,
-    status: 'open',
-    developer: 'diego@diego.com',
-  },
-  {
-    id: 2,
-    title: 'Issue 2 with windows size',
-    description: 'Desc',
-    severity: 3,
-    status: 'open',
-    developer: 'diego@diego.com',
-  },
-  {
-    id: 3,
-    title: 'Issue 3 with windows size',
-    description: 'Desc',
-    severity: 1,
-    status: 'open',
-    developer: 'diego@diego.com',
-  },
-  {
-    id: 4,
-    title: 'Issue 4 with windows size',
-    description: 'Desc',
-    severity: 2,
-    status: 'open',
-    developer: null,
-  },
-  {
-    id: 5,
-    title: 'Issue 5 with windows size',
-    description: 'Desc',
-    severity: 4,
-    status: 'close',
-    developer: null,
-  },
-  {
-    id: 6,
-    title: 'Issue 6 with windows size',
-    description: 'Desc',
-    severity: 4,
-    status: 'open',
-    developer: null,
-  },
-  {
-    id: 7,
-    title: 'Issue 7 with windows size',
-    description: 'Desc',
-    severity: 3,
-    status: 'close',
-    developer: null,
-  },
-  {
-    id: 8,
-    title: 'Issue 8 with windows size',
-    description: 'Desc',
-    severity: 2,
-    status: 'open',
-    developer: null,
-  },
-];
+import { fetchIssues } from '../../Utils/api';
 
 const Issues = () => {
   const [info, setInfo] = useState({
@@ -84,11 +20,15 @@ const Issues = () => {
     filteredInfo: undefined,
   });
   const [isEditVisible, setEditVisible] = useState(false);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
+  //  TODO: manejar paginado
+  const [page, setPage] = useState(0);
   const [form] = Form.useForm();
   const history = useHistory();
 
   const user = useSelector(selectUser);
+
+  const { resolvedData } = usePaginatedQuery([page], fetchIssues);
 
   const handleClickEdit = (issue) => {
     setEditVisible(true);
@@ -182,7 +122,7 @@ const Issues = () => {
     <MainLayout>
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={resolvedData && resolvedData.data && resolvedData.data.results}
         pagination={{ pageSize: 50 }}
         scroll={{ y: 550 }}
         onChange={handleChange}
