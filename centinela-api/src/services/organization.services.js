@@ -53,9 +53,14 @@ const addUserToOrganization = async (orgId, user) => {
   await organization.save();
 };
 
+const deleteOrganizationById = async (orgId) => {
+  return Organization.findByIdAndDelete(orgId);
+};
+
 module.exports = {
   createOrganization,
   getOrganizationById,
   addUserToOrganization,
   getOrganizationByName,
+  deleteOrganizationById,
 };

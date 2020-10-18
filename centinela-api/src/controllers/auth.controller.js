@@ -24,11 +24,17 @@ const register = catchAsync(async (req, res) => {
     password,
     role: ADMIN_ROLE,
   };
-  const user = await userService.createUser(userBody, org._id);
 
-  const tokens = await tokenService.generateAuthTokens(user);
-  logger.info(`User ${email} registered`);
-  res.status(httpStatus.CREATED).send({ user, tokens });
+  try {
+    const user = await userService.createUser(userBody, org._id);
+    const tokens = await tokenService.generateAuthTokens(user);
+    logger.info(`User ${email} registered`);
+    res.status(httpStatus.CREATED).send({ user, tokens });
+  } catch (e) {
+    await organizationService.deleteOrganizationById(org._id);
+    logger.warn(`User ${email} not created and organization ${orgName} deleted`);
+    throw e;
+  }
 });
 
 /**
@@ -42,14 +48,14 @@ const registerUser = catchAsync(async (req, res) => {
   const org = await organizationService.getOrganizationByName(organization);
 
   if (!org) {
-    logger.info(`User ${email} tried registering by invitation but the organization does not exist`);
+    logger.warn(`User ${email} tried registering by invitation but the organization does not exist`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation - Organization does not exists');
   }
 
   //  Validate invitation
   const invitation = await invitationService.getInvitationById(invitationId, org._id);
   if (!invitation || invitation.email !== email) {
-    logger.info(`User ${email} tried registering by invitation but the invitation is invalid`);
+    logger.warn(`User ${email} tried registering by invitation but the invitation is invalid`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation');
   }
 
