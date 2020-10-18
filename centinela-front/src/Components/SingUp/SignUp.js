@@ -4,7 +4,8 @@ import { useDispatch } from 'react-redux';
 
 import { Container, Link } from './SignUp.styles';
 import { login } from '../../Slices/accountSlice';
-import useQuery from '../../Utils/useQuery';
+import useURLQuery from '../../Utils/useQuery';
+import { createOrgAndUser } from '../../Utils/api';
 
 const layout = {
   labelCol: { span: 8 },
@@ -23,24 +24,34 @@ const validateMessages = {
 };
 
 const SignUp = ({ setForm }) => {
+  const [errorMessage, setErrorMesage] = React.useState('');
+
   const dispatch = useDispatch();
-  const query = useQuery();
 
-  const company = query.get('company');
+  const query = useURLQuery();
+
+  const organization = query.get('organization');
   const token = query.get('token');
-  const isInvitation = company && token;
+  const isInvitation = organization && token;
 
-  const onFinish = (values) => {
-    // TODO: Sign-up endpoint (create organization & user)
-    const { password } = values;
-    const user = { role: password === 'admin' ? 'admin' : 'developer'}
-    dispatch(login(user));
+  const onFinish = ({ name, email, password, organization }) => {
+    createOrgAndUser(
+      { name, email, password, organization },
+      //  On Success
+      (user) => {
+        dispatch(login(user));
+      },
+      // On error
+      (resp) => {
+        setErrorMesage(resp.message);
+      },
+    );
   };
 
   return (
     <Container>
       <Typography.Title level={3}>
-        {isInvitation ? 'Join company' : 'Create company'}
+        {isInvitation ? 'Join organization' : 'Create organization'}
       </Typography.Title>
       <Form
         {...layout}
@@ -63,13 +74,13 @@ const SignUp = ({ setForm }) => {
 
         {isInvitation ? (
           <Alert
-            message={`Your are joining ${company}`}
+            message={`Your are joining ${organization}`}
             type="info"
             showIcon
             style={{ marginBottom: 18 }}
           />
         ) : (
-          <Form.Item label="Company" name="company" rules={[{ required: true }]}>
+          <Form.Item label="Organization" name="organization" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         )}
@@ -81,6 +92,8 @@ const SignUp = ({ setForm }) => {
           Or <Link onClick={() => setForm('signin')}>sign in!</Link>
         </Form.Item>
       </Form>
+      {/* TODO: agregar estilos */}
+      <div>{errorMessage}</div>
     </Container>
   );
 };
