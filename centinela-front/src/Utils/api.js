@@ -50,3 +50,18 @@ export const login = ({ email, password }, onSuccess, onError) => {
 export const fetchIssues = (page) => {
   return axios.get(`/issues?page=${page}`);
 };
+
+
+/** KEY CALLS */
+export const createKey = ({ name }, onSuccess, onError) => {
+  axios
+    .post('/keys', {
+      name
+    })
+    .then(function () {
+      onSuccess();
+    })
+    .catch(function (error) {
+      onError(error.response.data);
+    });
+};

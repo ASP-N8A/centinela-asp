@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Form, Button, Input, Typography, List } from 'antd';
 
+import { createKey } from '../../Utils/api';
+
 import MainLayout from '../../Layouts/MainLayout';
 
 const { Text } = Typography;
@@ -22,31 +24,44 @@ const initialKeys = [
 ];
 
 const Keys = () => {
+  const [errorMessage, setErrorMesage] = React.useState('');
   const [form] = Form.useForm();
   const [keys, setKeys] = useState(initialKeys);
 
-  const onFinish = (values) => {
-    // TODO: Create key endpoint
-    const { name } = values;
-    form.resetFields();
+  const onFinish = ({ name }) => {
+    createKey(
+      { name },
+      //  On Success
+      () => {
+        form.resetFields();
+      },
+      // On error
+      (resp) => {
+        setErrorMesage(resp.message);
+      },
+    );
   };
 
   const renderForm = () => (
-    <Form layout="inline" name="create-key" onFinish={onFinish} form={form}>
-      <Form.Item
-        label="Name"
-        name="name"
-        rules={[{ required: true, message: 'Please enter a name!' }]}
-      >
-        <Input />
-      </Form.Item>
+    <div>
+      <Form layout="inline" name="create-key" onFinish={onFinish} form={form}>
+        <Form.Item
+          label="Name"
+          name="name"
+          rules={[{ required: true, message: 'Please enter a name!' }]}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Create key
-        </Button>
-      </Form.Item>
-    </Form>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Create key
+          </Button>
+        </Form.Item>
+      </Form>
+      {/* TODO: agregar estilos */}
+      <div>{errorMessage}</div>
+    </div>
   );
 
   const renderKeys = () => {
