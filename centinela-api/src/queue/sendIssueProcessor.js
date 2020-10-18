@@ -22,12 +22,14 @@ module.exports = async function (job) {
   },  Developer: ${issue.developer || 'Not asigned'}, Status: ${issue.status}`;
   const subject = `Issue created (${org.name})`;
 
-  return users.map((email) => {
-    return emailService
-      .sendEmail(email, subject, text)
-      .then((sentInfo) => sentInfo)
-      .catch((e) => {
-        return Promise.reject(new Error(`error sending email, ${e.message}`));
-      });
-  });
+  // eslint-disable-next-line no-restricted-syntax
+  for await (const email of users) {
+    try {
+      await emailService.sendEmail(email, subject, text);
+    } catch (e) {
+      return Promise.reject(new Error(`error sending email, ${e.message}`));
+    }
+  }
+
+  return Promise.resolve();
 };
