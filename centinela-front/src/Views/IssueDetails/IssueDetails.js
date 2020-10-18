@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
+
+import { fetchIssue } from '../../Utils/api';
+
 import {
   Container,
   HeaderContainer,
@@ -17,12 +20,11 @@ const { Text, Link } = Typography;
 // mock data
 const initialIssue = {
   id: 1,
-  title: 'Issue 1 with windows size',
-  description:
-    'At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias exceptur',
+  title: '',
+  description: '',
   severity: 1,
-  status: 'open',
-  developer: 'diego@diego.com',
+  status: '',
+  developer: '',
 };
 
 // const issue = null;
@@ -33,10 +35,20 @@ const IssueDetails = () => {
   const [isLoading, setLoading] = useState(false);
   const [closeRecently, setCloseRecently] = useState(false);
   const [issue, setIssue] = useState(initialIssue);
+  const [error, setError] = useState(false);
   const { title, description, severity, status, developer } = issue;
 
   useEffect(() => {
-    // get issue details with `id`
+    fetchIssue(
+      id,
+      //  On Success
+      (issue) => {
+        setIssue(issue);
+      },
+      () => {
+        setError(true);
+      },
+    );
   }, []);
 
   const getStatusTag = () => {
@@ -72,7 +84,7 @@ const IssueDetails = () => {
     return <Spin size="large" />;
   }
 
-  if (!issue) {
+  if (error) {
     return (
       <Result
         status="404"

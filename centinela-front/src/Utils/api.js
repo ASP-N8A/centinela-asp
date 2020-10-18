@@ -51,6 +51,18 @@ export const fetchIssues = (page) => {
   return axios.get(`/issues?page=${page}`);
 };
 
+export const fetchIssue = (id, onSuccess, onError) => {
+  axios
+    .get(`/issues/${id}`)
+    .then(function (response) {
+      onSuccess(response.data);
+    })
+    .catch(function (error) {
+      debugger;
+      onError(error);
+    });
+};
+
 /** KEY ROUTES */
 export const createKey = ({ name }, onSuccess, onError) => {
   axios

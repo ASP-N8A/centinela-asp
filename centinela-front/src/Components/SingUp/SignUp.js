@@ -30,7 +30,7 @@ const SignUp = ({ setForm }) => {
 
   const query = useURLQuery();
 
-  const organization = query.get('organization');
+  const organization = query.get('company');
   const token = query.get('token');
   const isInvitation = organization && token;
 
