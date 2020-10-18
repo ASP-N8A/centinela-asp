@@ -40,7 +40,10 @@ const getIssues = catchAsync(async (req, res) => {
 });
 
 const getIssue = catchAsync(async (req, res) => {
-  const issue = await issueService.getIssueById(req.params.issueId);
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
+  const issue = await issueService.getIssueById(req.params.issueId, org);
   if (!issue) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Issue not found');
   }
