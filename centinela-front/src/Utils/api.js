@@ -1,6 +1,7 @@
 import axios from 'axios';
+import { API_URL } from './config';
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+axios.defaults.baseURL = API_URL;
 axios.defaults.headers.common.Accept = 'application/json, application/octet-stream';
 
 export const setAuthToken = (token) => {
