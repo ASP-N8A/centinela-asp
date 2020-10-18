@@ -1,6 +1,8 @@
 import React from 'react';
 import { Form, Input, Button, Select } from 'antd';
 
+import { sendInvitation } from '../../Utils/api';
+
 import MainLayout from '../../Layouts/MainLayout';
 
 const { Option } = Select;
@@ -13,12 +15,22 @@ const validateMessages = {
 };
 
 const Invite = () => {
+  const [errorMessage, setErrorMesage] = React.useState('');
+
   const [form] = Form.useForm();
 
-  const onFinish = (values) => {
-    // TODO: Invite endpoint
-    const { email, role } = values;
-    form.resetFields();
+  const onFinish = ({ email, role }) => {
+    sendInvitation(
+      { email, role },
+      //  On Success
+      () => {
+        form.resetFields();
+      },
+      // On error
+      (resp) => {
+        setErrorMesage(resp.message);
+      },
+    );
   };
 
   return (
@@ -30,27 +42,14 @@ const Invite = () => {
         onFinish={onFinish}
         form={form}
       >
-        <Form.Item
-          label="Email"
-          name="email"
-          rules={[{ required: true, type: 'email' }]}
-        >
+        <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email' }]}>
           <Input />
         </Form.Item>
 
-        <Form.Item
-          style={{ width: 120 }}
-          name="role"
-
-          initialValue='developer'
-        >
-          <Select defaultValue='developer'>
-            <Option value='admin'>
-              Admin
-            </Option>
-            <Option value='developer'>
-              Developer
-            </Option>
+        <Form.Item style={{ width: 120 }} name="role" initialValue="developer">
+          <Select defaultValue="developer">
+            <Option value="admin">Admin</Option>
+            <Option value="developer">Developer</Option>
           </Select>
         </Form.Item>
 
@@ -60,6 +59,8 @@ const Invite = () => {
           </Button>
         </Form.Item>
       </Form>
+      {/* TODO: agregar estilos */}
+      <div>{errorMessage}</div>
     </MainLayout>
   );
 };

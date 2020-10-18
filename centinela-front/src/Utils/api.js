@@ -7,7 +7,7 @@ export const setAuthToken = (token) => {
   axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 };
 
-/** AUTH CALLS */
+/** AUTH ROUTES */
 export const createOrgAndUser = ({ name, email, password, organization }, onSuccess, onError) => {
   axios
     .post('/auth/register', {
@@ -46,17 +46,31 @@ export const login = ({ email, password }, onSuccess, onError) => {
     });
 };
 
-/** ISSUES CALLS */
+/** ISSUES ROUTES */
 export const fetchIssues = (page) => {
   return axios.get(`/issues?page=${page}`);
 };
 
-
-/** KEY CALLS */
+/** KEY ROUTES */
 export const createKey = ({ name }, onSuccess, onError) => {
   axios
     .post('/keys', {
-      name
+      name,
+    })
+    .then(function () {
+      onSuccess();
+    })
+    .catch(function (error) {
+      onError(error.response.data);
+    });
+};
+
+/** INVITE */
+export const sendInvitation = ({ email, role }, onSuccess, onError) => {
+  axios
+    .post('/invitations', {
+      email,
+      role,
     })
     .then(function () {
       onSuccess();
