@@ -25,10 +25,12 @@ const createInvitation = catchAsync(async (req, res) => {
 });
 
 const getInvitations = catchAsync(async (req, res) => {
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
   const filter = pick(req.query, ['name', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await invitationService.queryInvitations(filter, options);
-  logger.info('Invitations listed');
+  const result = await invitationService.queryInvitations(filter, options, org);
+  logger.info(`Invitations listed for organization ${org}`);
   res.send(result);
 });
 
