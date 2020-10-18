@@ -10,7 +10,6 @@ const organizationSchema = mongoose.Schema({
   users: {
     type: [String],
     required: true,
-    unique: true,
   },
 });
 

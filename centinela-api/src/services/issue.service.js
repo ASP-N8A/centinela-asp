@@ -5,6 +5,7 @@ const { IssueSchema } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { getModelByTenant } = require('../models/util');
 const config = require('../config/config');
+const logger = require('../config/logger');
 
 const client = redis.createClient({ port: config.redis.port, host: config.redis.host, password: config.redis.password });
 const GET_ASYNC = promisify(client.get).bind(client);
@@ -38,6 +39,7 @@ const getIssueById = async (id, orgId) => {
 const updateIssueById = async (issueId, updateBody, orgId) => {
   const issue = await getIssueById(issueId, orgId);
   if (!issue) {
+    logger.info(`Issue with Id ${issueId} not found`);
     throw new ApiError(httpStatus.NOT_FOUND, 'Issue not found');
   }
   Object.assign(issue, updateBody);
@@ -48,6 +50,7 @@ const updateIssueById = async (issueId, updateBody, orgId) => {
 const getCritical = async (orgId) => {
   const reply = await GET_ASYNC(orgId);
   if (reply) {
+    logger.info(`Critical issues returned from cache`);
     return JSON.parse(reply);
   }
 
@@ -59,6 +62,7 @@ const getCritical = async (orgId) => {
     client.set(orgId, JSON.stringify(issues));
     client.expire(orgId, 60);
   }
+  logger.info(`Critical issues returned from database`);
   return issues;
 };
 

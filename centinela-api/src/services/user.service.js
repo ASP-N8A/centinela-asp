@@ -1,11 +1,14 @@
 const httpStatus = require('http-status');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 
 const createUser = async (userBody, orgId) => {
   if (await User.isEmailTaken(userBody.email)) {
+    logger.info(`${userBody.email} tried to sign up but ${userBody.email} is taken`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
   }
+
   const user = await User.create({ ...userBody, organization: orgId });
   return user;
 };
@@ -35,9 +38,11 @@ const getUserByEmail = async (email) => {
 const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
   if (!user) {
+    logger.info(`Could not update user with id ${userId} because it was not found`);
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
+    logger.info(`Could not update user with id ${userId} because the new email was taken`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   Object.assign(user, updateBody);
@@ -48,6 +53,7 @@ const updateUserById = async (userId, updateBody) => {
 const deleteUserById = async (userId) => {
   const user = await getUserById(userId);
   if (!user) {
+    logger.info(`Could not delete user with id ${userId} because it was not found`);
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
   await user.remove();

@@ -3,7 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 const { authService, userService, tokenService, organizationService, invitationService } = require('../services');
 const { ADMIN_ROLE } = require('../config/roles');
 const ApiError = require('../utils/ApiError');
-const { User } = require('../models');
+const logger = require('../config/logger');
 
 /**
  * Register organization and user
@@ -13,12 +13,9 @@ const register = catchAsync(async (req, res) => {
     body: { name, organization: orgName, email, password },
   } = req;
 
-  if (await User.isEmailTaken(email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
-  }
-
   // Create organization
   const org = await organizationService.createOrganization(orgName, email);
+  logger.info(`Organization ${orgName} created by ${email}`);
 
   // Create user
   const userBody = {
@@ -27,10 +24,17 @@ const register = catchAsync(async (req, res) => {
     password,
     role: ADMIN_ROLE,
   };
-  const user = await userService.createUser(userBody, org._id);
 
-  const tokens = await tokenService.generateAuthTokens(user);
-  res.status(httpStatus.CREATED).send({ user, tokens });
+  try {
+    const user = await userService.createUser(userBody, org._id);
+    const tokens = await tokenService.generateAuthTokens(user);
+    logger.info(`User ${email} registered`);
+    res.status(httpStatus.CREATED).send({ user, tokens });
+  } catch (e) {
+    await organizationService.deleteOrganizationById(org._id);
+    logger.warn(`User ${email} not created and organization ${orgName} deleted`);
+    throw e;
+  }
 });
 
 /**
@@ -41,19 +45,17 @@ const registerUser = catchAsync(async (req, res) => {
     body: { name, email, password, invitationId, organization },
   } = req;
 
-  if (await User.isEmailTaken(email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already in use');
-  }
-
   const org = await organizationService.getOrganizationByName(organization);
 
   if (!org) {
+    logger.warn(`User ${email} tried registering by invitation but the organization does not exist`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation - Organization does not exists');
   }
 
   //  Validate invitation
   const invitation = await invitationService.getInvitationById(invitationId, org._id);
   if (!invitation || invitation.email !== email) {
+    logger.warn(`User ${email} tried registering by invitation but the invitation is invalid`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid invitation');
   }
 
@@ -70,6 +72,7 @@ const registerUser = catchAsync(async (req, res) => {
   await organizationService.addUserToOrganization(org._id, email);
 
   const tokens = await tokenService.generateAuthTokens(user);
+  logger.info(`User ${email} registered by invitation`);
   res.status(httpStatus.CREATED).send({ user, tokens });
 });
 
@@ -77,6 +80,7 @@ const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const tokens = await tokenService.generateAuthTokens(user);
+  logger.info(`User ${email} loged in`);
   res.send({ user, tokens });
 });
 
