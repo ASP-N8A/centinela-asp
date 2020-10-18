@@ -6,6 +6,8 @@ import { Container } from './SignIn.styles';
 import { login } from '../../Slices/accountSlice';
 import { Link } from '../SingUp/SignUp.styles';
 
+import { login as signin } from '../../Utils/api';
+
 const layout = {
   labelCol: { span: 8 },
   wrapperCol: { span: 16 },
@@ -23,13 +25,22 @@ const validateMessages = {
 };
 
 const SignIn = ({ setForm }) => {
+  const [errorMessage, setErrorMesage] = React.useState('');
+
   const dispatch = useDispatch();
 
-  const onFinish = (values) => {
-    // TODO: Sign-in endpoint
-    const { password } = values;
-    const user = { role: password === 'admin' ? 'admin' : 'developer' };
-    dispatch(login(user));
+  const onFinish = ({ email, password }) => {
+    signin(
+      { email, password },
+      //  On Success
+      (user) => {
+        dispatch(login(user));
+      },
+      // On error
+      (resp) => {
+        setErrorMesage(resp.message);
+      },
+    );
   };
 
   return (
@@ -56,6 +67,8 @@ const SignIn = ({ setForm }) => {
           Or <Link onClick={() => setForm('signup')}>register now!</Link>
         </Form.Item>
       </Form>
+      {/* TODO: agregar estilos */}
+      <div>{errorMessage}</div>
     </Container>
   );
 };
