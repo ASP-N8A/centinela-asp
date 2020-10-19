@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
+import { useQuery } from 'react-query';
 
 import { fetchIssue } from '../../Utils/api';
 
@@ -32,24 +33,9 @@ const initialIssue = {
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [isLoading, setLoading] = useState(false);
+  const { isLoading, data, error } = useQuery(id, fetchIssue);
   const [closeRecently, setCloseRecently] = useState(false);
-  const [issue, setIssue] = useState(initialIssue);
-  const [error, setError] = useState(false);
-  const { title, description, severity, status, developer } = issue;
-
-  useEffect(() => {
-    fetchIssue(
-      id,
-      //  On Success
-      (issue) => {
-        setIssue(issue);
-      },
-      () => {
-        setError(true);
-      },
-    );
-  }, []);
+  const { title, description, severity, status, developer } = data ? data.data : initialIssue;
 
   const getStatusTag = () => {
     if (status === 'open') {
@@ -76,7 +62,6 @@ const IssueDetails = () => {
 
   const handleCloseIssue = () => {
     // close Issue request.
-    setIssue({ ...initialIssue, status: 'close' });
     setCloseRecently(true);
   };
 

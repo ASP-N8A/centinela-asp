@@ -36,16 +36,8 @@ export const fetchIssues = (page) => {
   return axios.get(`/issues?page=${page}`);
 };
 
-export const fetchIssue = (id, onSuccess, onError) => {
-  axios
-    .get(`/issues/${id}`)
-    .then(function (response) {
-      onSuccess(response.data);
-    })
-    .catch(function (error) {
-      debugger;
-      onError(error);
-    });
+export const fetchIssue = (id) => {
+  return axios.get(`/issues/${id}`);
 };
 
 /** KEY ROUTES */
