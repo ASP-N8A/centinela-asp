@@ -29,22 +29,15 @@ export const createOrgAndUser = ({ name, email, password, organization }, onSucc
     });
 };
 
-export const login = ({ email, password }, onSuccess, onError) => {
-  axios
-    .post('/auth/login', {
-      email,
-      password,
-    })
-    .then(function (response) {
-      const {
-        data: { tokens, user },
-      } = response;
-      setAuthToken(tokens.access.token);
-      onSuccess(user);
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const login = async ({ email, password }) => {
+  const { data } = await axios.post('/auth/login', {
+    email,
+    password,
+  });
+  const { user, tokens } = data;
+  setAuthToken(tokens.access.token);
+
+  return user;
 };
 
 /** ISSUES ROUTES */
