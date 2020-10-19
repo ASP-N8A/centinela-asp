@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation } from 'react-query';
 
-import { fetchIssue } from '../../Utils/api';
+import { fetchIssue, patchIssue } from '../../Utils/api';
 
 import {
   Container,
@@ -31,7 +31,11 @@ const initialIssue = {
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
+  const [mutate, { isLoading: loadingPath, error: errorPatch, data: mutationData }] = useMutation(
+    patchIssue,
+  );
   const { isLoading, data, error } = useQuery(id, fetchIssue);
+
   const [closeRecently, setCloseRecently] = useState(false);
   const { title, description, severity, status, developer } = data ? data.data : initialIssue;
 
@@ -59,11 +63,13 @@ const IssueDetails = () => {
   };
 
   const handleCloseIssue = () => {
-    // close Issue request.
+    const values = { ...data.data, status: 'close' };
+    delete values.id;
+    mutate({ values, id });
     setCloseRecently(true);
   };
 
-  if (isLoading) {
+  if (isLoading || loadingPath) {
     return <Spin size="large" />;
   }
 

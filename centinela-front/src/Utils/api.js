@@ -40,6 +40,11 @@ export const fetchIssue = (id) => {
   return axios.get(`/issues/${id}`);
 };
 
+export const patchIssue = async ({ values, id }) => {
+  const { data } = await axios.patch(`/issues/${id}`, values);
+  return data;
+};
+
 /** INVITE */
 export const sendInvitation = async ({ email, role }) => {
   const { data } = await axios.post('/invitations', {
