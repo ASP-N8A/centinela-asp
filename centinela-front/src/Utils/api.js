@@ -40,31 +40,11 @@ export const fetchIssue = (id) => {
   return axios.get(`/issues/${id}`);
 };
 
-/** KEY ROUTES */
-export const createKey = ({ name }, onSuccess, onError) => {
-  axios
-    .post('/keys', {
-      name,
-    })
-    .then(function () {
-      onSuccess();
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
-};
-
 /** INVITE */
-export const sendInvitation = ({ email, role }, onSuccess, onError) => {
-  axios
-    .post('/invitations', {
-      email,
-      role,
-    })
-    .then(function () {
-      onSuccess();
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const sendInvitation = async ({ email, role }) => {
+  const { data } = await axios.post('/invitations', {
+    email,
+    role,
+  });
+  return data;
 };

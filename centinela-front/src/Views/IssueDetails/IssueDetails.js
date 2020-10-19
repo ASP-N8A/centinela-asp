@@ -28,8 +28,6 @@ const initialIssue = {
   developer: '',
 };
 
-// const issue = null;
-
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
