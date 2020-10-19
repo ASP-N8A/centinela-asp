@@ -9,24 +9,15 @@ export const setAuthToken = (token) => {
 };
 
 /** AUTH ROUTES */
-export const createOrgAndUser = ({ name, email, password, organization }, onSuccess, onError) => {
-  axios
-    .post('/auth/register', {
-      organization,
-      name,
-      email,
-      password,
-    })
-    .then(function (response) {
-      const {
-        data: { tokens, user },
-      } = response;
-      setAuthToken(tokens.access.token);
-      onSuccess(user);
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const signUp = async ({ values, invitationId, organizationToJoin }) => {
+  const url = invitationId ? 'auth/registerUser' : '/auth/register';
+  const newValues = invitationId
+    ? { ...values, organization: organizationToJoin, invitationId }
+    : values;
+  const { data } = await axios.post(url, newValues);
+  const { user, tokens } = data;
+  setAuthToken(tokens.access.token);
+  return user;
 };
 
 export const login = async ({ email, password }) => {
