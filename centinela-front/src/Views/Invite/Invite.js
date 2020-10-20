@@ -39,7 +39,7 @@ const Invite = () => {
   };
 
   const renderSucces = () => {
-    return <Result status="success" title="Invitation succesfully sended!" />;
+    return <Result status="success" title="Invitation succesfully sent!" />;
   };
 
   return (

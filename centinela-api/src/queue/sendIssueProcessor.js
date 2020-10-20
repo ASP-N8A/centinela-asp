@@ -19,7 +19,7 @@ module.exports = async function (job) {
 
   const text = `Issue created: Id:${issue._id}, Title: ${issue.title}, Description: ${issue.description}, Severity: ${
     issue.severity
-  },  Developer: ${issue.developer || 'Not asigned'}, Status: ${issue.status}`;
+  },  Developer: ${issue.developer || 'Not assigned'}, Status: ${issue.status}`;
   const subject = `Issue created (${org.name})`;
 
   // eslint-disable-next-line no-restricted-syntax

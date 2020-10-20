@@ -8,6 +8,7 @@ import IssueDetails from './Views/IssueDetails/IssueDetails';
 import Invite from './Views/Invite/Invite';
 import Keys from './Views/Keys/Keys';
 import auth from './Utils/auth';
+import MainLayout from './Layouts/MainLayout';
 
 function App() {
   const history = useHistory();
@@ -16,6 +17,9 @@ function App() {
   }
   if (!auth.isAuthenticated() && history.location.pathname !== '/') {
     history.push('/');
+  }
+  if (!auth.isAdmin() && ['/invite', '/keys', '/statistics'].includes(history.location.pathname)) {
+    history.push('/403');
   }
   return (
     <React.Fragment>
@@ -35,12 +39,23 @@ function App() {
         <Route exact path="/">
           <Authentication />
         </Route>
+        <Route path="/403">
+          <MainLayout>
+            <Result
+              status="403"
+              title="403"
+              subTitle="Sorry, you dont have permisson to access this page."
+            />
+          </MainLayout>
+        </Route>
         <Route path="/">
-          <Result
-            status="404"
-            title="404"
-            subTitle="Sorry, the page you visited does not exist."
-          />
+          <MainLayout>
+            <Result
+              status="404"
+              title="404"
+              subTitle="Sorry, the page you visited does not exist."
+            />
+          </MainLayout>
         </Route>
       </Switch>
       <ReactQueryDevtools initialIsOpen={false} />

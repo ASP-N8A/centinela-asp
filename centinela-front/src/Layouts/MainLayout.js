@@ -12,7 +12,7 @@ const MainLayout = ({ children }) => {
   const logout = () => {
     auth.clear();
     history.push('/');
-  }
+  };
 
   const getSelectedKey = () => {
     const { pathname } = location;
@@ -37,14 +37,19 @@ const MainLayout = ({ children }) => {
           <Menu.Item key="1" onClick={() => history.push('/issues')}>
             Issues
           </Menu.Item>
-          <Menu.Item key="2" onClick={() => history.push('/invite')}>
-            Invite
-          </Menu.Item>
-          <Menu.Item key="3" onClick={() => history.push('/keys')}>
-            Mange keys
-          </Menu.Item>
-          <Menu.Item key="4">Statistics</Menu.Item>
-          <Menu.Item key="5" onClick={logout} style={{ position: 'absolute', right: 0}}>
+          {auth.isAdmin() && (
+            <Menu.Item key="2" onClick={() => history.push('/invite')}>
+              Invite
+            </Menu.Item>
+          )}
+          {auth.isAdmin() && (
+            <Menu.Item key="3" onClick={() => history.push('/keys')}>
+              Mange keys
+            </Menu.Item>
+          )}
+          {auth.isAdmin() && <Menu.Item key="4">Statistics</Menu.Item>}
+
+          <Menu.Item key="5" onClick={logout} style={{ position: 'absolute', right: 0 }}>
             Log out
           </Menu.Item>
         </Menu>
