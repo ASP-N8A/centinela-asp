@@ -18,7 +18,6 @@ import MainLayout from '../../Layouts/MainLayout';
 
 const { Text, Link } = Typography;
 
-// mock data
 const initialIssue = {
   id: 1,
   title: '',
@@ -31,7 +30,7 @@ const initialIssue = {
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [mutate, { isLoading: loadingPath, error: errorPatch, data: mutationData }] = useMutation(
+  const [mutate, { isLoading: loadingPatch, error: errorPatch, data: mutationData }] = useMutation(
     patchIssue,
   );
   const { isLoading, data, error } = useQuery(id, fetchIssue);
@@ -69,7 +68,7 @@ const IssueDetails = () => {
     setCloseRecently(true);
   };
 
-  if (isLoading || loadingPath) {
+  if (isLoading || loadingPatch) {
     return <Spin size="large" />;
   }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, Typography, Result } from 'antd';
+import { Form, Input, Button, Typography, message } from 'antd';
 import { useDispatch } from 'react-redux';
 import { useMutation } from 'react-query';
 
@@ -30,6 +30,12 @@ const SignIn = ({ setForm }) => {
 
   const dispatch = useDispatch();
 
+  React.useEffect(() => {
+    if (error) {
+      renderError();
+    }
+  }, [error]);
+
   const onFinish = async ({ email, password }) => {
     const user = await mutate({ email, password });
     if (user) {
@@ -41,7 +47,7 @@ const SignIn = ({ setForm }) => {
     const {
       response: { data },
     } = error;
-    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
+    return message.error(data.message);
   };
 
   return (
@@ -68,7 +74,6 @@ const SignIn = ({ setForm }) => {
           Or <Link onClick={() => setForm('signup')}>register now!</Link>
         </Form.Item>
       </Form>
-      {error && renderError()}
     </Container>
   );
 };

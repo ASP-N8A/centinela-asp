@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, Alert, Typography, Result } from 'antd';
+import { Form, Input, Button, Alert, Typography, message } from 'antd';
 import { useDispatch } from 'react-redux';
 import { useMutation } from 'react-query';
 
@@ -29,6 +29,12 @@ const SignUp = ({ setForm }) => {
 
   const dispatch = useDispatch();
 
+  React.useEffect(() => {
+    if (error) {
+      renderError();
+    }
+  }, [error]);
+
   const query = useURLQuery();
 
   const organizationToJoin = query.get('company');
@@ -50,7 +56,7 @@ const SignUp = ({ setForm }) => {
     const {
       response: { data },
     } = error;
-    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
+    return message.error(data.message);
   };
 
   return (
@@ -97,7 +103,6 @@ const SignUp = ({ setForm }) => {
           Or <Link onClick={() => setForm('signin')}>sign in!</Link>
         </Form.Item>
       </Form>
-      {error && renderError()}
     </Container>
   );
 };

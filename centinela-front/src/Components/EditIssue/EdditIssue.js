@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Select, Button, Result } from 'antd';
+import { Form, Input, Select, Button, message } from 'antd';
 import { useMutation } from 'react-query';
 
 import { patchIssue } from '../../Utils/api';
@@ -15,6 +15,15 @@ const layout = {
 const EdditIssue = ({ form }) => {
   const [mutate, { isLoading, error, data }] = useMutation(patchIssue);
 
+  React.useEffect(() => {
+    if (data) {
+      renderSucces();
+    }
+    if (error) {
+      renderError();
+    }
+  }, [error, data]);
+
   const onFinish = (values) => {
     const { id } = values;
     delete values.id;
@@ -25,11 +34,11 @@ const EdditIssue = ({ form }) => {
     const {
       response: { data },
     } = error;
-    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
+    return message.error(data.message);
   };
 
   const renderSucces = () => {
-    return <Result status="success" title="Issue succesfully updated!" />;
+    return message.success('Issue succesfully updated!');
   };
   return (
     <React.Fragment>
@@ -61,8 +70,6 @@ const EdditIssue = ({ form }) => {
           </Button>
         </Form.Item>
       </Form>
-      {data && renderSucces()}
-      {error && renderError()}
     </React.Fragment>
   );
 };
