@@ -3,42 +3,43 @@ import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
 import { useQuery, useMutation, queryCache } from 'react-query';
 
-import { fetchIssue, patchIssue } from '../../Utils/api';
-
 import {
   Container,
   HeaderContainer,
   IssueTitle,
   Description,
   DeveloperContainer,
+  Developer,
 } from './IssueDetails.styles';
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { theme } from '../../theme';
 import MainLayout from '../../Layouts/MainLayout';
+import api from '../../Utils/new-api';
 
 const { Text, Link } = Typography;
 
-const initialIssue = {
-  id: 1,
-  title: '',
-  description: '',
-  severity: 1,
-  status: '',
-  developer: '',
+export const fetchIssue = async (id) => {
+  const { data } = await api.get(`/issues/${id}`);
+  return data;
+};
+
+export const patchIssue = async ({ values, id }) => {
+  const { data } = await api.patch(`/issues/${id}`, values);
+  return data;
 };
 
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [mutate, { isLoading: loadingPatch, error: errorPatch }] = useMutation(patchIssue, {
-    onSuccess: (resp) => queryCache.setQueryData(id, { data: { data: resp } }),
-  });
-  const { isLoading, data, error } = useQuery(id, fetchIssue);
-
   const [closeRecently, setCloseRecently] = useState(false);
-  const { title, description, severity, status, developer } = data ? data.data : initialIssue;
+  const { isLoading, data, error } = useQuery(id, fetchIssue);
+  const [mutate, { isLoading: loadingPatch, error: errorPatch }] = useMutation(patchIssue, {
+    onSuccess: (data) => {
+      queryCache.setQueryData(id, data);
+    },
+  });
 
-  const getStatusTag = () => {
+  const getStatusTag = (status) => {
     if (status === 'open') {
       return (
         <Tag icon={<SyncOutlined spin />} color="processing">
@@ -54,7 +55,7 @@ const IssueDetails = () => {
     );
   };
 
-  const getSeverityTag = () => {
+  const getSeverityTag = (severity) => {
     if (severity) {
       return <Tag color={theme.colors.severity[severity - 1]}>{severity}</Tag>;
     }
@@ -67,10 +68,6 @@ const IssueDetails = () => {
     mutate({ values, id });
     setCloseRecently(true);
   };
-
-  if (isLoading || loadingPatch) {
-    return <Spin size="large" />;
-  }
 
   if (error) {
     return (
@@ -87,23 +84,25 @@ const IssueDetails = () => {
     );
   }
 
-  return (
-    <MainLayout>
-      <Container>
+  const renderContent = () => {
+    const { title, description, severity, status, developer } = data;
+
+    return (
+      <>
         <HeaderContainer>
           <IssueTitle level={4}>{title}</IssueTitle>
           <Space>
-            {getStatusTag()}
-            {getSeverityTag()}
+            {getStatusTag(status)}
+            {getSeverityTag(severity)}
           </Space>
         </HeaderContainer>
         <Description>{description || 'No description.'}</Description>
         <DeveloperContainer>
           <IssueTitle level={5}>Developer:</IssueTitle>
-          <Description>{developer || 'Not assigned.'}</Description>
+          <Developer>{developer || 'Not assigned.'}</Developer>
         </DeveloperContainer>
         {status === 'open' ? (
-          <Button type="primary" onClick={handleCloseIssue}>
+          <Button type="primary" onClick={handleCloseIssue} loading={loadingPatch}>
             Close Issue
           </Button>
         ) : closeRecently ? (
@@ -111,7 +110,7 @@ const IssueDetails = () => {
             message="Issue status"
             description={
               <Text>
-                Issue was succesfully closed, <Link href="/">return to home</Link>
+                Issue was succesfully closed, <Link href="/issues">return to home</Link>
               </Text>
             }
             type="success"
@@ -122,14 +121,20 @@ const IssueDetails = () => {
             message="Issue status"
             description={
               <Text>
-                This issue is already closed, <Link href="/">return to home</Link>
+                This issue is already closed, <Link href="/issues">return to home</Link>
               </Text>
             }
             type="info"
             showIcon
           />
         )}
-      </Container>
+      </>
+    );
+  };
+
+  return (
+    <MainLayout>
+      <Container>{isLoading ? <Spin size="large" /> : renderContent()}</Container>
     </MainLayout>
   );
 };

@@ -6,6 +6,7 @@ import { API_URL } from './config';
 const getToken = () => Cookies.get('token');
 const getRefreshToken = () => Cookies.get('refreshToken');
 const isAuthenticated = () => !!getToken();
+const isAdmin = () => Cookies.get('role') === 'admin';
 const storeToken = (token, refreshToken) => {
   Cookies.set('token', token, {
     sameSite: 'strict',
@@ -32,6 +33,7 @@ const getNewToken = () =>
 export default {
   getToken,
   isAuthenticated,
+  isAdmin,
   storeToken,
   clear,
   getNewToken,

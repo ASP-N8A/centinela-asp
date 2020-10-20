@@ -2,6 +2,7 @@ import React from 'react';
 import { Form, Input, Button, Alert, Typography, message } from 'antd';
 import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 import { Container, Link } from './SignUp.styles';
 import useURLQuery from '../../Utils/useQuery';
@@ -29,15 +30,18 @@ const postSignup = async ({ values, invitationId, organizationToJoin }) => {
   const newValues = invitationId
     ? { ...values, organization: organizationToJoin, invitationId }
     : values;
-  return await api.post(url, newValues);
+
+  const { data } = await api.post(url, newValues);
+  return data;
 };
 
 const SignUp = ({ setForm }) => {
   const history = useHistory();
   const [mutateSignup, { isLoading, error }] = useMutation(postSignup, {
     onSuccess: (response) => {
-      console.log('response ', response);
-      auth.storeToken(response.data.tokens.access.token, response.data.tokens.refresh.token);
+      const { tokens, user } = response;
+      auth.storeToken(tokens.access.token, tokens.refresh.token);
+      Cookies.set('role', user.role);
       history.push('/issues');
     },
   });

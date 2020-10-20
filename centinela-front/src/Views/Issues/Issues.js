@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { Table, Space, Modal, Form } from 'antd';
-import { useSelector } from 'react-redux';
+import { Table, Space, Modal, Form, message } from 'antd';
 import { useHistory } from 'react-router-dom';
-import { usePaginatedQuery } from 'react-query';
+import { usePaginatedQuery, useMutation, queryCache } from 'react-query';
 
 import { Link } from '../../Components/SingUp/SignUp.styles';
-import { selectUser } from '../../Slices/accountSlice';
 import EdditIssue from '../../Components/EditIssue/EdditIssue';
 import MainLayout from '../../Layouts/MainLayout';
 
-import { fetchIssues } from '../../Utils/api';
+import api from '../../Utils/new-api';
+import auth from '../../Utils/auth';
+
+const fetchIssues = (queryParams) => {
+  return api.get(`/issues?${queryParams}`);
+};
+
+const patchIssue = async ({ values, id }) => {
+  const { data } = await api.patch(`/issues/${id}`, values);
+  return data;
+};
 
 const Issues = () => {
   const [info, setInfo] = useState({
@@ -20,15 +28,27 @@ const Issues = () => {
     filteredInfo: undefined,
   });
   const [isEditVisible, setEditVisible] = useState(false);
-  const [data, setData] = useState([]);
+  const [issues, setIssues] = useState([]);
   const [queryParams, setQueryParams] = useState('page=0&status=open&sortBy=severity');
   const [pagination, setPagination] = useState({ pageSize: 10 });
   const [form] = Form.useForm();
   const history = useHistory();
 
-  const user = useSelector(selectUser);
+  const { resolvedData, isLoading, isFetching } = usePaginatedQuery([queryParams], fetchIssues);
+  const [mutate] = useMutation(patchIssue, {
+    onSuccess: (data) => {
+      const { id } = data;
+      queryCache.setQueryData(['issues', { id }], data);
 
-  const { resolvedData } = usePaginatedQuery([queryParams], fetchIssues);
+      message.success('Issue updated!');
+
+      const newIssues = [...issues];
+      const indexIssue = issues.findIndex((issue) => issue.id === id);
+      newIssues.splice(indexIssue, 1, data);
+      setIssues(newIssues);
+    },
+    onError: (err) => message.error(`Error ocurred: ${err.message}`),
+  });
 
   const handleClickEdit = (issue) => {
     setEditVisible(true);
@@ -46,7 +66,7 @@ const Issues = () => {
         current: page,
       };
       setPagination(newPagination);
-      setData(results);
+      setIssues(results);
     }
   }, [resolvedData]);
 
@@ -54,15 +74,11 @@ const Issues = () => {
     form
       .validateFields()
       .then((values) => {
-        console.log('new values ', values);
         form.resetFields();
-        // TODO: PUT edit issue
 
-        // Function to simulate behaviour
-        const index = data.findIndex((issue) => issue.id === values.id);
-        const newData = [...data];
-        newData.splice(index, 1, values);
-        setData(newData);
+        const { id } = values;
+        delete values.id;
+        mutate({ values, id });
 
         setEditVisible(false);
       })
@@ -118,7 +134,7 @@ const Issues = () => {
       key: 'action',
       render: (text, issue) => (
         <Space>
-          {user?.role === 'admin' && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
+          {auth.isAdmin() && <Link onClick={() => handleClickEdit(issue)}>Edit</Link>}
           <Link onClick={() => history.push(`/issue/${issue.id}`)}>View</Link>
         </Space>
       ),
@@ -142,10 +158,11 @@ const Issues = () => {
     <MainLayout>
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={issues}
         pagination={pagination}
         scroll={{ y: 550 }}
         onChange={handleChange}
+        loading={isLoading || isFetching}
       />
       <Modal
         title="Edit Issue"

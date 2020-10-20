@@ -3,6 +3,7 @@ import { Form, Input, Button, Typography, message } from 'antd';
 import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 import { Container } from './SignIn.styles';
 import { Link } from '../SingUp/SignUp.styles';
@@ -25,7 +26,7 @@ const validateMessages = {
 };
 
 const postLogin = async ({ email, password }) => {
-  const data = await axios.post('/auth/login', {
+  const { data } = await axios.post('/auth/login', {
     email,
     password,
   });
@@ -38,8 +39,9 @@ const SignIn = ({ setForm }) => {
 
   const [mutateLogin, { isLoading, error }] = useMutation(postLogin, {
     onSuccess: (response) => {
-      console.log('response ', response);
-      auth.storeToken(response.data.tokens.access.token, response.data.tokens.refresh.token);
+      const { tokens, user } = response;
+      auth.storeToken(tokens.access.token, tokens.refresh.token);
+      Cookies.set('role', user.role)
       history.push('/issues');
     },
   });
