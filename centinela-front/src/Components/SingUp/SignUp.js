@@ -1,10 +1,14 @@
 import React from 'react';
-import { Form, Input, Button, Alert, Typography } from 'antd';
-import { useDispatch } from 'react-redux';
+import { Form, Input, Button, Alert, Typography, message } from 'antd';
+import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
+import Cookies from 'js-cookie';
 
 import { Container, Link } from './SignUp.styles';
-import { login } from '../../Slices/accountSlice';
-import useQuery from '../../Utils/useQuery';
+import useURLQuery from '../../Utils/useQuery';
+import api from '../../Utils/api';
+import auth from '../../Utils/auth';
+import { API_URL } from '../../Utils/config';
 
 const layout = {
   labelCol: { span: 8 },
@@ -22,25 +26,58 @@ const validateMessages = {
   },
 };
 
+const postSignup = async ({ values, invitationId, organizationToJoin }) => {
+  const url = invitationId ? 'auth/registerUser' : 'auth/register';
+  const newValues = invitationId
+    ? { ...values, organization: organizationToJoin, invitationId }
+    : values;
+
+  const { data } = await api.post(`${API_URL}${url}`, newValues);
+  return data;
+};
+
 const SignUp = ({ setForm }) => {
-  const dispatch = useDispatch();
-  const query = useQuery();
+  const history = useHistory();
+  const [mutateSignup, { isLoading, error }] = useMutation(postSignup, {
+    onSuccess: (response) => {
+      const { tokens, user } = response;
+      auth.storeToken(tokens.access.token, tokens.refresh.token);
+      Cookies.set('role', user.role);
+      history.push('/issues');
+    },
+  });
 
-  const company = query.get('company');
+  React.useEffect(() => {
+    if (error) {
+      renderError();
+    }
+  }, [error]);
+
+  const query = useURLQuery();
+
+  const organizationToJoin = query.get('company');
   const token = query.get('token');
-  const isInvitation = company && token;
+  const isInvitation = organizationToJoin && token;
 
-  const onFinish = (values) => {
-    // TODO: Sign-up endpoint (create organization & user)
-    const { password } = values;
-    const user = { role: password === 'admin' ? 'admin' : 'developer'}
-    dispatch(login(user));
+  const onFinish = async ({ name, email, password, organization }) => {
+    await mutateSignup({
+      values: { name, email, password, organization },
+      invitationId: isInvitation,
+      organizationToJoin,
+    });
+  };
+
+  const renderError = () => {
+    const {
+      response: { data },
+    } = error;
+    return message.error(data.message);
   };
 
   return (
     <Container>
       <Typography.Title level={3}>
-        {isInvitation ? 'Join company' : 'Create company'}
+        {isInvitation ? 'Join organization' : 'Create organization'}
       </Typography.Title>
       <Form
         {...layout}
@@ -63,19 +100,19 @@ const SignUp = ({ setForm }) => {
 
         {isInvitation ? (
           <Alert
-            message={`Your are joining ${company}`}
+            message={`Your are joining ${organizationToJoin}`}
             type="info"
             showIcon
             style={{ marginBottom: 18 }}
           />
         ) : (
-          <Form.Item label="Company" name="company" rules={[{ required: true }]}>
+          <Form.Item label="Organization" name="organization" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
         )}
 
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }} loading={isLoading}>
             Submit
           </Button>
           Or <Link onClick={() => setForm('signin')}>sign in!</Link>

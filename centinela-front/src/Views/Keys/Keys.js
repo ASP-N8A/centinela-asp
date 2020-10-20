@@ -1,75 +1,72 @@
-import React, { useState } from 'react';
-import { Form, Button, Input, Typography, List } from 'antd';
-
+import React from 'react';
+import { Form, Button, Input, Typography, Result } from 'antd';
+import { useMutation } from 'react-query';
 import MainLayout from '../../Layouts/MainLayout';
+import api from '../../Utils/api';
 
 const { Text } = Typography;
 
-// mock data
-const initialKeys = [
-  {
-    name: 'develop',
-    value: 'K3qs4HObsppqHrMZCIebNeSsVQ8agfqP',
-  },
-  {
-    name: 'production',
-    value: 'tP0ctfAjtwYvLBSohgOdUINMHoH8PlDn',
-  },
-  {
-    name: 'test',
-    value: 'u2mkICL6HEF5p1CliCrN0JcEEsRmknJi',
-  },
-];
+const postKey = async (name) => {
+  const { data } = await api.post('/keys', {
+    name,
+  });
+  return data;
+};
 
 const Keys = () => {
   const [form] = Form.useForm();
-  const [keys, setKeys] = useState(initialKeys);
+  const [mutate, { isLoading, data, error }] = useMutation(postKey);
 
-  const onFinish = (values) => {
-    // TODO: Create key endpoint
-    const { name } = values;
+  const onFinish = ({ name }) => {
+    mutate(name);
     form.resetFields();
   };
 
   const renderForm = () => (
-    <Form layout="inline" name="create-key" onFinish={onFinish} form={form}>
-      <Form.Item
-        label="Name"
-        name="name"
-        rules={[{ required: true, message: 'Please enter a name!' }]}
-      >
-        <Input />
-      </Form.Item>
+    <div>
+      <Form layout="inline" name="create-key" onFinish={onFinish} form={form}>
+        <Form.Item
+          label="Name"
+          name="name"
+          rules={[{ required: true, message: 'Please enter a name!' }]}
+        >
+          <Input />
+        </Form.Item>
 
-      <Form.Item>
-        <Button type="primary" htmlType="submit">
-          Create key
-        </Button>
-      </Form.Item>
-    </Form>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={isLoading}>
+            Create key
+          </Button>
+        </Form.Item>
+      </Form>
+    </div>
   );
 
-  const renderKeys = () => {
+  const renderKeyValue = () => {
     return (
-      <List
-        size="small"
-        style={{ marginTop: 28 }}
-        header={<div>Keys</div>}
-        bordered
-        dataSource={keys}
-        renderItem={(key) => (
-          <List.Item>
-            <Text strong>{key.name}</Text> - <Text copyable>{key.value}</Text>
-          </List.Item>
-        )}
-      />
+      <>
+        <Text style={{ marginRight: 4, fontWeight: 600 }}>Key:</Text>
+        <Text copyable ellipsis style={{ maxWidth: 300, marginRight: 8, fontStyle: 'italic' }}>
+          {data.token}
+        </Text>
+        <Text>This is the only chance you have to save the key, keep it save.</Text>
+      </>
     );
+  };
+
+  const renderKey = () => {
+    return <Result status="success" title="Key succesfully created!" subTitle={renderKeyValue()} />;
+  };
+
+  const renderError = () => {
+    return <Result status="error" title="Submission Failed" subTitle={error.message} />;
   };
 
   return (
     <MainLayout>
       {renderForm()}
-      {renderKeys()}
+      {data && renderKey()}
+      {error && renderError()}
     </MainLayout>
   );
 };

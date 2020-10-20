@@ -35,9 +35,9 @@ const updateIssue = {
   body: Joi.object()
     .keys({
       title: Joi.string(),
-      description: Joi.string(),
-      severity: Joi.number().valid(1, 2, 3, 4),
-      developer: Joi.string().email(),
+      description: Joi.string().allow('').optional(),
+      severity: Joi.number().valid(1, 2, 3, 4).optional(),
+      developer: Joi.string().email().allow('').optional(),
       status: Joi.string().valid('open', 'close'),
     })
     .min(1),

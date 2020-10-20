@@ -1,10 +1,14 @@
 import React from 'react';
-import { Form, Input, Button, Typography } from 'antd';
-import { useDispatch } from 'react-redux';
+import { Form, Input, Button, Typography, message } from 'antd';
+import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 import { Container } from './SignIn.styles';
-import { login } from '../../Slices/accountSlice';
 import { Link } from '../SingUp/SignUp.styles';
+import auth from '../../Utils/auth';
+import { API_URL } from '../../Utils/config';
 
 const layout = {
   labelCol: { span: 8 },
@@ -22,14 +26,41 @@ const validateMessages = {
   },
 };
 
-const SignIn = ({ setForm }) => {
-  const dispatch = useDispatch();
+const postLogin = async ({ email, password }) => {
+  const { data } = await axios.post(`${API_URL}/auth/login`, {
+    email,
+    password,
+  });
+  return data;
+};
 
-  const onFinish = (values) => {
-    // TODO: Sign-in endpoint
-    const { password } = values;
-    const user = { role: password === 'admin' ? 'admin' : 'developer' };
-    dispatch(login(user));
+const SignIn = ({ setForm }) => {
+  const history = useHistory();
+
+  const [mutateLogin, { isLoading, error }] = useMutation(postLogin, {
+    onSuccess: (response) => {
+      const { tokens, user } = response;
+      auth.storeToken(tokens.access.token, tokens.refresh.token);
+      Cookies.set('role', user.role);
+      history.push('/issues');
+    },
+  });
+
+  React.useEffect(() => {
+    if (error) {
+      renderError();
+    }
+  }, [error]);
+
+  const onFinish = async ({ email, password }) => {
+    await mutateLogin({ email, password });
+  };
+
+  const renderError = () => {
+    const {
+      response: { data },
+    } = error;
+    return message.error(data.message);
   };
 
   return (
@@ -50,7 +81,7 @@ const SignIn = ({ setForm }) => {
         </Form.Item>
 
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }} loading={isLoading}>
             Log in
           </Button>
           Or <Link onClick={() => setForm('signup')}>register now!</Link>

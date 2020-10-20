@@ -32,11 +32,14 @@ export const BadgeContainer = styled.div`
   display: flex;
 `;
 
-export const Description = styled(Text)`
+export const Description = styled(Text)``;
+
+export const Developer = styled(Text)`
+  display: flex;
   align-self: end;
 `;
 
 export const DeveloperContainer = styled.div`
   display: flex;
   margin: 20px 0px;
-`
+`;
