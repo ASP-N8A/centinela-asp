@@ -1,12 +1,13 @@
 import React from 'react';
-import { Form, Input, Button, Typography } from 'antd';
+import { Form, Input, Button, Typography, Result } from 'antd';
 import { useDispatch } from 'react-redux';
+import { useMutation } from 'react-query';
 
 import { Container } from './SignIn.styles';
-import { login } from '../../Slices/accountSlice';
+import { login as loginSlice } from '../../Slices/accountSlice';
 import { Link } from '../SingUp/SignUp.styles';
 
-import { login as signin } from '../../Utils/api';
+import { login as loginCall } from '../../Utils/api';
 
 const layout = {
   labelCol: { span: 8 },
@@ -25,22 +26,22 @@ const validateMessages = {
 };
 
 const SignIn = ({ setForm }) => {
-  const [errorMessage, setErrorMesage] = React.useState('');
+  const [mutate, { isLoading, error }] = useMutation(loginCall);
 
   const dispatch = useDispatch();
 
-  const onFinish = ({ email, password }) => {
-    signin(
-      { email, password },
-      //  On Success
-      (user) => {
-        dispatch(login(user));
-      },
-      // On error
-      (resp) => {
-        setErrorMesage(resp.message);
-      },
-    );
+  const onFinish = async ({ email, password }) => {
+    const user = await mutate({ email, password });
+    if (user) {
+      dispatch(loginSlice(user));
+    }
+  };
+
+  const renderError = () => {
+    const {
+      response: { data },
+    } = error;
+    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
   };
 
   return (
@@ -61,14 +62,13 @@ const SignIn = ({ setForm }) => {
         </Form.Item>
 
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }} loading={isLoading}>
             Log in
           </Button>
           Or <Link onClick={() => setForm('signup')}>register now!</Link>
         </Form.Item>
       </Form>
-      {/* TODO: agregar estilos */}
-      <div>{errorMessage}</div>
+      {error && renderError()}
     </Container>
   );
 };

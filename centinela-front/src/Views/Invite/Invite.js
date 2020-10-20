@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Input, Button, Select } from 'antd';
+import { Form, Input, Button, Select, Result } from 'antd';
+import { useMutation } from 'react-query';
 
 import { sendInvitation } from '../../Utils/api';
 
@@ -15,22 +16,23 @@ const validateMessages = {
 };
 
 const Invite = () => {
-  const [errorMessage, setErrorMesage] = React.useState('');
-
+  const [mutate, { isLoading, data, error }] = useMutation(sendInvitation);
   const [form] = Form.useForm();
 
   const onFinish = ({ email, role }) => {
-    sendInvitation(
-      { email, role },
-      //  On Success
-      () => {
-        form.resetFields();
-      },
-      // On error
-      (resp) => {
-        setErrorMesage(resp.message);
-      },
-    );
+    mutate({ email, role });
+    form.resetFields();
+  };
+
+  const renderError = () => {
+    const {
+      response: { data },
+    } = error;
+    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
+  };
+
+  const renderSucces = () => {
+    return <Result status="success" title="Invitation succesfully sended!" />;
   };
 
   return (
@@ -54,13 +56,13 @@ const Invite = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit">
+          <Button type="primary" htmlType="submit" loading={isLoading}>
             Send invite
           </Button>
         </Form.Item>
       </Form>
-      {/* TODO: agregar estilos */}
-      <div>{errorMessage}</div>
+      {data && renderSucces()}
+      {error && renderError()}
     </MainLayout>
   );
 };

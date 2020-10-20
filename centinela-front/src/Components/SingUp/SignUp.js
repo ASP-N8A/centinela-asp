@@ -1,11 +1,12 @@
 import React from 'react';
-import { Form, Input, Button, Alert, Typography } from 'antd';
+import { Form, Input, Button, Alert, Typography, Result } from 'antd';
 import { useDispatch } from 'react-redux';
+import { useMutation } from 'react-query';
 
 import { Container, Link } from './SignUp.styles';
 import { login } from '../../Slices/accountSlice';
 import useURLQuery from '../../Utils/useQuery';
-import { createOrgAndUser } from '../../Utils/api';
+import { signUp } from '../../Utils/api';
 
 const layout = {
   labelCol: { span: 8 },
@@ -24,28 +25,32 @@ const validateMessages = {
 };
 
 const SignUp = ({ setForm }) => {
-  const [errorMessage, setErrorMesage] = React.useState('');
+  const [mutate, { isLoading, error }] = useMutation(signUp);
 
   const dispatch = useDispatch();
 
   const query = useURLQuery();
 
-  const organization = query.get('company');
+  const organizationToJoin = query.get('company');
   const token = query.get('token');
-  const isInvitation = organization && token;
+  const isInvitation = organizationToJoin && token;
 
-  const onFinish = ({ name, email, password, organization }) => {
-    createOrgAndUser(
-      { name, email, password, organization },
-      //  On Success
-      (user) => {
-        dispatch(login(user));
-      },
-      // On error
-      (resp) => {
-        setErrorMesage(resp.message);
-      },
-    );
+  const onFinish = async ({ name, email, password, organization }) => {
+    const user = await mutate({
+      values: { name, email, password, organization },
+      invitationId: isInvitation,
+      organizationToJoin,
+    });
+    if (user) {
+      dispatch(login(user));
+    }
+  };
+
+  const renderError = () => {
+    const {
+      response: { data },
+    } = error;
+    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
   };
 
   return (
@@ -74,7 +79,7 @@ const SignUp = ({ setForm }) => {
 
         {isInvitation ? (
           <Alert
-            message={`Your are joining ${organization}`}
+            message={`Your are joining ${organizationToJoin}`}
             type="info"
             showIcon
             style={{ marginBottom: 18 }}
@@ -86,14 +91,13 @@ const SignUp = ({ setForm }) => {
         )}
 
         <Form.Item {...tailLayout}>
-          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+          <Button type="primary" htmlType="submit" style={{ marginRight: 8 }} loading={isLoading}>
             Submit
           </Button>
           Or <Link onClick={() => setForm('signin')}>sign in!</Link>
         </Form.Item>
       </Form>
-      {/* TODO: agregar estilos */}
-      <div>{errorMessage}</div>
+      {error && renderError()}
     </Container>
   );
 };

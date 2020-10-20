@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
+import { useQuery, useMutation } from 'react-query';
 
-import { fetchIssue } from '../../Utils/api';
+import { fetchIssue, patchIssue } from '../../Utils/api';
 
 import {
   Container,
@@ -27,29 +28,16 @@ const initialIssue = {
   developer: '',
 };
 
-// const issue = null;
-
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [isLoading, setLoading] = useState(false);
-  const [closeRecently, setCloseRecently] = useState(false);
-  const [issue, setIssue] = useState(initialIssue);
-  const [error, setError] = useState(false);
-  const { title, description, severity, status, developer } = issue;
+  const [mutate, { isLoading: loadingPath, error: errorPatch, data: mutationData }] = useMutation(
+    patchIssue,
+  );
+  const { isLoading, data, error } = useQuery(id, fetchIssue);
 
-  useEffect(() => {
-    fetchIssue(
-      id,
-      //  On Success
-      (issue) => {
-        setIssue(issue);
-      },
-      () => {
-        setError(true);
-      },
-    );
-  }, []);
+  const [closeRecently, setCloseRecently] = useState(false);
+  const { title, description, severity, status, developer } = data ? data.data : initialIssue;
 
   const getStatusTag = () => {
     if (status === 'open') {
@@ -75,12 +63,13 @@ const IssueDetails = () => {
   };
 
   const handleCloseIssue = () => {
-    // close Issue request.
-    setIssue({ ...initialIssue, status: 'close' });
+    const values = { ...data.data, status: 'close' };
+    delete values.id;
+    mutate({ values, id });
     setCloseRecently(true);
   };
 
-  if (isLoading) {
+  if (isLoading || loadingPath) {
     return <Spin size="large" />;
   }
 

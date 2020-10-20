@@ -9,42 +9,26 @@ export const setAuthToken = (token) => {
 };
 
 /** AUTH ROUTES */
-export const createOrgAndUser = ({ name, email, password, organization }, onSuccess, onError) => {
-  axios
-    .post('/auth/register', {
-      organization,
-      name,
-      email,
-      password,
-    })
-    .then(function (response) {
-      const {
-        data: { tokens, user },
-      } = response;
-      setAuthToken(tokens.access.token);
-      onSuccess(user);
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const signUp = async ({ values, invitationId, organizationToJoin }) => {
+  const url = invitationId ? 'auth/registerUser' : '/auth/register';
+  const newValues = invitationId
+    ? { ...values, organization: organizationToJoin, invitationId }
+    : values;
+  const { data } = await axios.post(url, newValues);
+  const { user, tokens } = data;
+  setAuthToken(tokens.access.token);
+  return user;
 };
 
-export const login = ({ email, password }, onSuccess, onError) => {
-  axios
-    .post('/auth/login', {
-      email,
-      password,
-    })
-    .then(function (response) {
-      const {
-        data: { tokens, user },
-      } = response;
-      setAuthToken(tokens.access.token);
-      onSuccess(user);
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const login = async ({ email, password }) => {
+  const { data } = await axios.post('/auth/login', {
+    email,
+    password,
+  });
+  const { user, tokens } = data;
+  setAuthToken(tokens.access.token);
+
+  return user;
 };
 
 /** ISSUES ROUTES */
@@ -52,43 +36,20 @@ export const fetchIssues = (page) => {
   return axios.get(`/issues?page=${page}`);
 };
 
-export const fetchIssue = (id, onSuccess, onError) => {
-  axios
-    .get(`/issues/${id}`)
-    .then(function (response) {
-      onSuccess(response.data);
-    })
-    .catch(function (error) {
-      debugger;
-      onError(error);
-    });
+export const fetchIssue = (id) => {
+  return axios.get(`/issues/${id}`);
 };
 
-/** KEY ROUTES */
-export const createKey = ({ name }, onSuccess, onError) => {
-  axios
-    .post('/keys', {
-      name,
-    })
-    .then(function () {
-      onSuccess();
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const patchIssue = async ({ values, id }) => {
+  const { data } = await axios.patch(`/issues/${id}`, values);
+  return data;
 };
 
 /** INVITE */
-export const sendInvitation = ({ email, role }, onSuccess, onError) => {
-  axios
-    .post('/invitations', {
-      email,
-      role,
-    })
-    .then(function () {
-      onSuccess();
-    })
-    .catch(function (error) {
-      onError(error.response.data);
-    });
+export const sendInvitation = async ({ email, role }) => {
+  const { data } = await axios.post('/invitations', {
+    email,
+    role,
+  });
+  return data;
 };
