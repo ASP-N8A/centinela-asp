@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useHistory, Link } from 'react-router-dom';
 import { useQuery, useMutation, queryCache } from 'react-query';
 
 import {
@@ -16,7 +16,7 @@ import { theme } from '../../theme';
 import MainLayout from '../../Layouts/MainLayout';
 import api from '../../Utils/api';
 
-const { Text, Link } = Typography;
+const { Text } = Typography;
 
 export const fetchIssue = async (id) => {
   const { data } = await api.get(`/issues/${id}`);
@@ -110,7 +110,7 @@ const IssueDetails = () => {
             message="Issue status"
             description={
               <Text>
-                Issue was succesfully closed, <Link href="/issues">return to home</Link>
+                Issue was succesfully closed, <Link to="/issues">return to home</Link>
               </Text>
             }
             type="success"
@@ -121,7 +121,7 @@ const IssueDetails = () => {
             message="Issue status"
             description={
               <Text>
-                This issue is already closed, <Link href="/issues">return to home</Link>
+                This issue is already closed, <Link to="/issues">return to home</Link>
               </Text>
             }
             type="info"
