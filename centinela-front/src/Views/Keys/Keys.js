@@ -47,7 +47,7 @@ const Keys = () => {
       <>
         <Text style={{ marginRight: 4, fontWeight: 600 }}>Key:</Text>
         <Text copyable ellipsis style={{ maxWidth: 300, marginRight: 8, fontStyle: 'italic' }}>
-          ${data.token}
+          {data.token}
         </Text>
         <Text>This is the only chance you have to save the key, keep it save.</Text>
       </>
