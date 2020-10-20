@@ -16,6 +16,7 @@ const storeToken = (token, refreshToken) => {
 }
 const clear = () => {
   Cookies.remove('token');
+  Cookies.remove('refreshToken');
 };
 const getNewToken = () =>
   axios

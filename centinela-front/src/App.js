@@ -1,8 +1,7 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
+import { Result } from 'antd';
+import { Switch, Route, useHistory } from 'react-router-dom';
 import { ReactQueryDevtools } from 'react-query-devtools';
-import { selectAuthenticated } from './Slices/accountSlice';
 import Authentication from './Views/Authentication/Authentication';
 import Issues from './Views/Issues/Issues';
 import IssueDetails from './Views/IssueDetails/IssueDetails';
@@ -11,6 +10,13 @@ import Keys from './Views/Keys/Keys';
 import auth from './Utils/auth';
 
 function App() {
+  const history = useHistory();
+  if (auth.isAuthenticated() && history.location.pathname === '/') {
+    history.push('/issues');
+  }
+  if (!auth.isAuthenticated() && history.location.pathname !== '/') {
+    history.push('/');
+  }
   return (
     <React.Fragment>
       <Switch>
@@ -23,10 +29,19 @@ function App() {
         <Route exact path="/keys">
           <Keys />
         </Route>
-        <Route exact path="/">
-          {auth.isAuthenticated() ? <Issues /> : <Authentication />}
+        <Route exact path="/issues">
+          <Issues />
         </Route>
-        <Route path="/">Not found</Route>
+        <Route exact path="/">
+          <Authentication />
+        </Route>
+        <Route path="/">
+          <Result
+            status="404"
+            title="404"
+            subTitle="Sorry, the page you visited does not exist."
+          />
+        </Route>
       </Switch>
       <ReactQueryDevtools initialIsOpen={false} />
     </React.Fragment>
