@@ -1,13 +1,12 @@
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import Router from 'next/router';
 import { useHistory } from 'react-router-dom';
 
 import auth from './auth';
 import { API_URL } from './config';
 
 const api = axios.create({
-  baseURL: API_URL, // TODO: Use env variables
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use(
@@ -38,15 +37,14 @@ api.interceptors.response.use(
 
     // Send to login page if no token stored
     if (!auth.isAuthenticated()) {
-      // Router.replace('/login');
-      useHistory().replace('/login');
+      // TODO Navigate to /
       return Promise.reject(error);
     }
 
     // Logout user if token refresh didn't work
     if (error.config.url === '/api-token-refresh/') {
       Cookies.remove('token');
-      Router.replace('/login');
+      // TODO Navigate to /
 
       return Promise.reject(error);
     }

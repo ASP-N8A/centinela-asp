@@ -1,13 +1,13 @@
 import React from 'react';
 import { Form, Button, Input, Typography, Result } from 'antd';
 import { useMutation } from 'react-query';
-import axios from 'axios';
 import MainLayout from '../../Layouts/MainLayout';
+import api from '../../Utils/new-api';
 
 const { Text } = Typography;
 
-const createKey = async (name) => {
-  const { data } = await axios.post('/keys', {
+const postKey = async (name) => {
+  const { data } = await api.post('/keys', {
     name,
   });
   return data;
@@ -15,7 +15,7 @@ const createKey = async (name) => {
 
 const Keys = () => {
   const [form] = Form.useForm();
-  const [mutate, { isLoading, data, error }] = useMutation(createKey);
+  const [mutate, { isLoading, data, error }] = useMutation(postKey);
 
   const onFinish = ({ name }) => {
     mutate(name);

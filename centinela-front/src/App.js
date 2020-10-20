@@ -8,10 +8,9 @@ import Issues from './Views/Issues/Issues';
 import IssueDetails from './Views/IssueDetails/IssueDetails';
 import Invite from './Views/Invite/Invite';
 import Keys from './Views/Keys/Keys';
+import auth from './Utils/auth';
 
 function App() {
-  const isAuthenticated = useSelector(selectAuthenticated);
-
   return (
     <React.Fragment>
       <Switch>
@@ -25,7 +24,7 @@ function App() {
           <Keys />
         </Route>
         <Route exact path="/">
-          {isAuthenticated ? <Issues /> : <Authentication />}
+          {auth.isAuthenticated() ? <Issues /> : <Authentication />}
         </Route>
         <Route path="/">Not found</Route>
       </Switch>

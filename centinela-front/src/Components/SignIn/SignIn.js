@@ -1,13 +1,12 @@
 import React from 'react';
 import { Form, Input, Button, Typography, Result } from 'antd';
-import { useDispatch } from 'react-redux';
 import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
+import axios from 'axios';
 
 import { Container } from './SignIn.styles';
-import { login as loginSlice } from '../../Slices/accountSlice';
 import { Link } from '../SingUp/SignUp.styles';
-
-import { login as loginCall } from '../../Utils/api';
+import auth from '../../Utils/auth';
 
 const layout = {
   labelCol: { span: 8 },
@@ -25,16 +24,28 @@ const validateMessages = {
   },
 };
 
-const SignIn = ({ setForm }) => {
-  const [mutate, { isLoading, error }] = useMutation(loginCall);
+const postLogin = async ({ email, password }) => {
+  const data = await axios.post('/auth/login', {
+    email,
+    password,
+  });
+  return data;
+};
 
-  const dispatch = useDispatch();
+
+const SignIn = ({ setForm }) => {
+  const history = useHistory();
+
+  const [mutateLogin, { isLoading, error }] = useMutation(postLogin, {
+    onSuccess: (response) => {
+      console.log('response ', response);
+      auth.storeToken(response.data.tokens.access.token, response.data.tokens.refresh.token);
+      history.push('/issues');
+    },
+  });
 
   const onFinish = async ({ email, password }) => {
-    const user = await mutate({ email, password });
-    if (user) {
-      dispatch(loginSlice(user));
-    }
+    await mutateLogin({ email, password });
   };
 
   const renderError = () => {

@@ -1,8 +1,7 @@
 import React from 'react';
 import { Form, Input, Button, Select, Result } from 'antd';
 import { useMutation } from 'react-query';
-
-import { sendInvitation } from '../../Utils/api';
+import api from '../../Utils/new-api';
 
 import MainLayout from '../../Layouts/MainLayout';
 
@@ -15,8 +14,16 @@ const validateMessages = {
   },
 };
 
+const postInvitation = async ({ email, role }) => {
+  const { data } = await api.post('/invitations', {
+    email,
+    role,
+  });
+  return data;
+};
+
 const Invite = () => {
-  const [mutate, { isLoading, data, error }] = useMutation(sendInvitation);
+  const [mutate, { isLoading, data, error }] = useMutation(postInvitation);
   const [form] = Form.useForm();
 
   const onFinish = ({ email, role }) => {

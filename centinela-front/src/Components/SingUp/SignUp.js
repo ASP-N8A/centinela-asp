@@ -1,12 +1,12 @@
 import React from 'react';
 import { Form, Input, Button, Alert, Typography, Result } from 'antd';
-import { useDispatch } from 'react-redux';
 import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
 
 import { Container, Link } from './SignUp.styles';
-import { login } from '../../Slices/accountSlice';
 import useURLQuery from '../../Utils/useQuery';
-import { signUp } from '../../Utils/api';
+import api from '../../Utils/new-api';
+import auth from '../../Utils/auth';
 
 const layout = {
   labelCol: { span: 8 },
@@ -24,10 +24,23 @@ const validateMessages = {
   },
 };
 
-const SignUp = ({ setForm }) => {
-  const [mutate, { isLoading, error }] = useMutation(signUp);
+const postSignup = async ({ values, invitationId, organizationToJoin }) => {
+  const url = invitationId ? 'auth/registerUser' : '/auth/register';
+  const newValues = invitationId
+    ? { ...values, organization: organizationToJoin, invitationId }
+    : values;
+  return await api.post(url, newValues);
+};
 
-  const dispatch = useDispatch();
+const SignUp = ({ setForm }) => {
+  const history = useHistory();
+  const [mutateSignup, { isLoading, error }] = useMutation(postSignup, {
+    onSuccess: (response) => {
+      console.log('response ', response);
+      auth.storeToken(response.data.tokens.access.token, response.data.tokens.refresh.token);
+      history.push('/issues');
+    },
+  });
 
   const query = useURLQuery();
 
@@ -36,14 +49,11 @@ const SignUp = ({ setForm }) => {
   const isInvitation = organizationToJoin && token;
 
   const onFinish = async ({ name, email, password, organization }) => {
-    const user = await mutate({
+    await mutateSignup({
       values: { name, email, password, organization },
       invitationId: isInvitation,
       organizationToJoin,
     });
-    if (user) {
-      dispatch(login(user));
-    }
   };
 
   const renderError = () => {
