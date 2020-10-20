@@ -8,6 +8,7 @@ import Cookies from 'js-cookie';
 import { Container } from './SignIn.styles';
 import { Link } from '../SingUp/SignUp.styles';
 import auth from '../../Utils/auth';
+import { API_URL } from '../../Utils/config';
 
 const layout = {
   labelCol: { span: 8 },
@@ -26,13 +27,12 @@ const validateMessages = {
 };
 
 const postLogin = async ({ email, password }) => {
-  const { data } = await axios.post('/auth/login', {
+  const { data } = await axios.post(`${API_URL}/auth/login`, {
     email,
     password,
   });
   return data;
 };
-
 
 const SignIn = ({ setForm }) => {
   const history = useHistory();
@@ -41,7 +41,7 @@ const SignIn = ({ setForm }) => {
     onSuccess: (response) => {
       const { tokens, user } = response;
       auth.storeToken(tokens.access.token, tokens.refresh.token);
-      Cookies.set('role', user.role)
+      Cookies.set('role', user.role);
       history.push('/issues');
     },
   });

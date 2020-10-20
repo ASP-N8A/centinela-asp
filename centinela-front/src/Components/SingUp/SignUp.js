@@ -6,8 +6,9 @@ import Cookies from 'js-cookie';
 
 import { Container, Link } from './SignUp.styles';
 import useURLQuery from '../../Utils/useQuery';
-import api from '../../Utils/new-api';
+import api from '../../Utils/api';
 import auth from '../../Utils/auth';
+import { API_URL } from '../../Utils/config';
 
 const layout = {
   labelCol: { span: 8 },
@@ -26,12 +27,12 @@ const validateMessages = {
 };
 
 const postSignup = async ({ values, invitationId, organizationToJoin }) => {
-  const url = invitationId ? 'auth/registerUser' : '/auth/register';
+  const url = invitationId ? 'auth/registerUser' : 'auth/register';
   const newValues = invitationId
     ? { ...values, organization: organizationToJoin, invitationId }
     : values;
 
-  const { data } = await api.post(url, newValues);
+  const { data } = await api.post(`${API_URL}${url}`, newValues);
   return data;
 };
 

@@ -14,7 +14,7 @@ import {
 import { CheckCircleOutlined, SyncOutlined } from '@ant-design/icons';
 import { theme } from '../../theme';
 import MainLayout from '../../Layouts/MainLayout';
-import api from '../../Utils/new-api';
+import api from '../../Utils/api';
 
 const { Text, Link } = Typography;
 

@@ -7,7 +7,7 @@ import { Link } from '../../Components/SingUp/SignUp.styles';
 import EdditIssue from '../../Components/EditIssue/EdditIssue';
 import MainLayout from '../../Layouts/MainLayout';
 
-import api from '../../Utils/new-api';
+import api from '../../Utils/api';
 import auth from '../../Utils/auth';
 
 const fetchIssues = (queryParams) => {

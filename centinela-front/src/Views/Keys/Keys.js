@@ -2,7 +2,7 @@ import React from 'react';
 import { Form, Button, Input, Typography, Result } from 'antd';
 import { useMutation } from 'react-query';
 import MainLayout from '../../Layouts/MainLayout';
-import api from '../../Utils/new-api';
+import api from '../../Utils/api';
 
 const { Text } = Typography;
 
