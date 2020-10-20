@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
 import { useParams, useHistory } from 'react-router-dom';
-import { useQuery, useMutation } from 'react-query';
+import { useQuery, useMutation, queryCache } from 'react-query';
 
 import { fetchIssue, patchIssue } from '../../Utils/api';
 
@@ -30,9 +30,9 @@ const initialIssue = {
 const IssueDetails = () => {
   const { id } = useParams();
   const history = useHistory();
-  const [mutate, { isLoading: loadingPatch, error: errorPatch, data: mutationData }] = useMutation(
-    patchIssue,
-  );
+  const [mutate, { isLoading: loadingPatch, error: errorPatch }] = useMutation(patchIssue, {
+    onSuccess: (resp) => queryCache.setQueryData(id, { data: { data: resp } }),
+  });
   const { isLoading, data, error } = useQuery(id, fetchIssue);
 
   const [closeRecently, setCloseRecently] = useState(false);

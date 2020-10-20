@@ -32,8 +32,8 @@ export const login = async ({ email, password }) => {
 };
 
 /** ISSUES ROUTES */
-export const fetchIssues = (page) => {
-  return axios.get(`/issues?page=${page}`);
+export const fetchIssues = (queryParams) => {
+  return axios.get(`/issues?${queryParams}`);
 };
 
 export const fetchIssue = (id) => {
