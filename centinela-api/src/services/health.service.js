@@ -8,15 +8,23 @@ const GET_ASYNC = promisify(client.get).bind(client);
 const SET_ASYNC = promisify(client.set).bind(client);
 
 const checkDbHealth = async () => {
-  const users = await User.count();
-  if (users) {
-    return true;
+  try {
+    const users = await User.count();
+    if (users) {
+      return true;
+    }
+  } catch (error) {
+    return false;
   }
   return false;
 };
 
 const checkRedisHealth = async () => {
-  await SET_ASYNC('health', 'check');
+  try {
+    await SET_ASYNC('health', 'check');
+  } catch (error) {
+    return false;
+  }
   client.expire('health', 5);
   const reply = await GET_ASYNC('health');
   if (reply) {

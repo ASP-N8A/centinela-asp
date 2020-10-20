@@ -8,15 +8,15 @@ const checkHealth = catchAsync(async (req, res) => {
 
   if (dbHealth && redisHealth) {
     logger.info(`Health check succesful`);
-    res.sendStatus(200);
+    res.status(200).send(`Health check succesful`);
   } else {
     if (!dbHealth) {
-      logger.info(`Database health check succesful`);
-      res.sendStatus(500);
+      logger.info(`Database health check unsuccesful`);
+      res.status(500).send(`Database health check unsuccesful`);
     }
     if (!redisHealth) {
-      logger.info(`Redis health check succesful`);
-      res.sendStatus(500);
+      logger.info(`Redis health check unsuccesful`);
+      res.status(500).send(`Redis health check unsuccesful`);
     }
   }
 });
