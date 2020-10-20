@@ -21,19 +21,34 @@ const Issues = () => {
   });
   const [isEditVisible, setEditVisible] = useState(false);
   const [data, setData] = useState([]);
-  //  TODO: manejar paginado
-  const [page, setPage] = useState(0);
+  const [queryParams, setQueryParams] = useState('page=0&status=open&sortBy=severity');
+  const [pagination, setPagination] = useState({ pageSize: 10 });
   const [form] = Form.useForm();
   const history = useHistory();
 
   const user = useSelector(selectUser);
 
-  const { resolvedData } = usePaginatedQuery([page], fetchIssues);
+  const { resolvedData } = usePaginatedQuery([queryParams], fetchIssues);
 
   const handleClickEdit = (issue) => {
     setEditVisible(true);
     form.setFieldsValue(issue);
   };
+
+  React.useEffect(() => {
+    if (resolvedData) {
+      const {
+        data: { results, limit, page, totalResults },
+      } = resolvedData;
+      let newPagination = {
+        pageSize: limit,
+        total: totalResults,
+        current: page,
+      };
+      setPagination(newPagination);
+      setData(results);
+    }
+  }, [resolvedData]);
 
   const handleEditIssue = () => {
     form
@@ -111,7 +126,12 @@ const Issues = () => {
     },
   ];
 
-  const handleChange = (_, filters, sorter) => {
+  const handleChange = ({ current, pageSize }, filters, sorter) => {
+    let newQuery = `page=${current}&limit=${pageSize}&sortBy=severity`;
+    if (filters.status && filters.status.length == 1) {
+      newQuery += `&status=${filters.status[0]}`;
+    }
+    setQueryParams(newQuery);
     setInfo({
       filteredInfo: filters,
       sortedInfo: sorter,
@@ -122,8 +142,8 @@ const Issues = () => {
     <MainLayout>
       <Table
         columns={columns}
-        dataSource={resolvedData && resolvedData.data && resolvedData.data.results}
-        pagination={{ pageSize: 50 }}
+        dataSource={data}
+        pagination={pagination}
         scroll={{ y: 550 }}
         onChange={handleChange}
       />

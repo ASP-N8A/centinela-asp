@@ -9,6 +9,7 @@ const { parseAuthToken } = require('../utils/parseAuthToken');
 const logger = require('../config/logger');
 const { issueEmailQueue } = require('../queue');
 const { userService } = require('../services');
+const { DEVELOPER_ROLE } = require('../config/roles');
 
 const createIssue = catchAsync(async (req, res) => {
   const accessKey = req.headers['access-key'];
@@ -61,14 +62,26 @@ const updateIssue = catchAsync(async (req, res) => {
   const { authorization } = req.headers;
   const { org } = parseAuthToken(authorization);
 
+  if (!req.body.developer) {
+    const issue = await issueService.updateIssueById(req.params.issueId, req.body, org);
+    logger.info(`Issue with Id ${req.params.issueId} updated`);
+    res.send(issue);
+    return;
+  }
+
   const user = await userService.getUserByEmail(req.body.developer);
-  if (!user) {
+  if (req.body.developer && !user) {
     logger.info(`User with email ${req.body.developer} does not exist`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'User not found');
   }
 
   if (org.toString() !== user.organization.toString()) {
     logger.info(`User with email ${req.body.developer} does not exist in the organization`);
+    throw new ApiError(httpStatus.BAD_REQUEST, 'User not found');
+  }
+
+  if (user.role !== DEVELOPER_ROLE) {
+    logger.info(`User with email ${req.body.developer} is not a developer`);
     throw new ApiError(httpStatus.BAD_REQUEST, 'User not found');
   }
   const issue = await issueService.updateIssueById(req.params.issueId, req.body, org);

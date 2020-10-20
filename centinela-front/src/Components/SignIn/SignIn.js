@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Input, Button, Typography, Result } from 'antd';
+import { Form, Input, Button, Typography, message } from 'antd';
 import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
@@ -44,6 +44,12 @@ const SignIn = ({ setForm }) => {
     },
   });
 
+  React.useEffect(() => {
+    if (error) {
+      renderError();
+    }
+  }, [error]);
+
   const onFinish = async ({ email, password }) => {
     await mutateLogin({ email, password });
   };
@@ -52,7 +58,7 @@ const SignIn = ({ setForm }) => {
     const {
       response: { data },
     } = error;
-    return <Result status="error" title="Submission Failed" subTitle={data.message} />;
+    return message.error(data.message);
   };
 
   return (
@@ -79,7 +85,6 @@ const SignIn = ({ setForm }) => {
           Or <Link onClick={() => setForm('signup')}>register now!</Link>
         </Form.Item>
       </Form>
-      {error && renderError()}
     </Container>
   );
 };

@@ -5,8 +5,8 @@ axios.defaults.baseURL = API_URL;
 axios.defaults.headers.common.Accept = 'application/json, application/octet-stream';
 
 /** ISSUES ROUTES */
-export const fetchIssues = (page) => {
-  return axios.get(`/issues?page=${page}`);
+export const fetchIssues = (queryParams) => {
+  return axios.get(`/issues?${queryParams}`);
 };
 
 export const fetchIssue = (id) => {
