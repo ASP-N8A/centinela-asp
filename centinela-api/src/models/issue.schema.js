@@ -30,6 +30,11 @@ const issueSchema = mongoose.Schema(
       enum: ['open', 'close'],
       default: 'open',
     },
+    keyName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
   {
     timestamps: true,

@@ -21,13 +21,13 @@ const createIssue = catchAsync(async (req, res) => {
     );
   }
 
-  const { orgId } = jwt.verify(accessKey, config.jwt.secret);
+  const { orgId, name } = jwt.verify(accessKey, config.jwt.secret);
   if (!orgId) {
     logger.info('Issue could not be created because the key was invalid');
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Access key not valid');
   }
 
-  const issue = await issueService.createIssue(req.body, orgId);
+  const issue = await issueService.createIssue({ ...req.body, keyName: name }, orgId);
   await issueEmailQueue.add({ orgId, issueId: issue._id });
   logger.info(`Issue with Id ${issue._id} created`);
   res.status(httpStatus.CREATED).send(issue);
