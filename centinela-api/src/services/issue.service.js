@@ -66,10 +66,40 @@ const getCritical = async (orgId) => {
   return issues;
 };
 
+/**
+ *
+ * @param {Object} period
+ * @param {Date} [period.dateFrom]
+ * @param {number} [period.dateTo]
+ * @param {*ObjetctId} orgId
+ */
+const queryStatistics = async (period, orgId) => {
+  const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
+  const { dateFrom, dateTo } = period;
+  let query = {
+    createdAt: {
+      $gte: dateFrom,
+      $lt: dateTo,
+    },
+  };
+  const total = await Issue.count(query);
+  const severities = await Issue.aggregate([{ $match: query }, { $group: { _id: '$severity', count: { $sum: 1 } } }]);
+  query = {
+    ...query,
+    status: 'close',
+  };
+  const resolved = await Issue.count(query);
+
+  logger.info(`Statistics colected.`);
+
+  return { total, resolved, severities };
+};
+
 module.exports = {
   createIssue,
   queryIssues,
   getIssueById,
   updateIssueById,
   getCritical,
+  queryStatistics,
 };

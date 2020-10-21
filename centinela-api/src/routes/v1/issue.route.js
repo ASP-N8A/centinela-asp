@@ -13,6 +13,8 @@ router
 
 router.route('/critical').get(validate(issueValidation.getIssues), issueController.getCritical);
 
+router.route('/statistics').get(validate(issueValidation.getStatistics), issueController.getStatistics);
+
 router
   .route('/:issueId')
   .get(auth('basic'), validate(issueValidation.getIssue), issueController.getIssue)

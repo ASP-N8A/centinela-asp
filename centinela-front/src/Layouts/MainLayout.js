@@ -47,8 +47,11 @@ const MainLayout = ({ children }) => {
               Mange keys
             </Menu.Item>
           )}
-          {auth.isAdmin() && <Menu.Item key="4">Statistics</Menu.Item>}
-
+          {auth.isAdmin() && (
+            <Menu.Item key="4" onClick={() => history.push('/statistics')}>
+              Statistics
+            </Menu.Item>
+          )}
           <Menu.Item key="5" onClick={logout} style={{ position: 'absolute', right: 0 }}>
             Log out
           </Menu.Item>

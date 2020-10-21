@@ -43,9 +43,17 @@ const updateIssue = {
     .min(1),
 };
 
+const getStatistics = {
+  query: Joi.object().keys({
+    dateFrom: Joi.date(),
+    dateTo: Joi.date(),
+  }),
+};
+
 module.exports = {
   createIssue,
   getIssues,
   getIssue,
   updateIssue,
+  getStatistics,
 };

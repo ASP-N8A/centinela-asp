@@ -7,6 +7,7 @@ import Issues from './Views/Issues/Issues';
 import IssueDetails from './Views/IssueDetails/IssueDetails';
 import Invite from './Views/Invite/Invite';
 import Keys from './Views/Keys/Keys';
+import Statistics from './Views/Statistics/Statistics';
 import auth from './Utils/auth';
 import MainLayout from './Layouts/MainLayout';
 
@@ -35,6 +36,9 @@ function App() {
         </Route>
         <Route exact path="/issues">
           <Issues />
+        </Route>
+        <Route exact path="/statistics">
+          <Statistics />
         </Route>
         <Route exact path="/">
           <Authentication />
