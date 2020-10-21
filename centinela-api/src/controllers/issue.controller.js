@@ -109,10 +109,22 @@ const getCritical = catchAsync(async (req, res) => {
   res.send(issue);
 });
 
+const getStatistics = catchAsync(async (req, res) => {
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
+  const period = pick(req.query, ['dateFrom', 'dateTo']);
+
+  const result = await issueService.queryStatistics(period, org);
+  logger.info(`Statistics returned for organization ${org}`);
+  res.send(result);
+});
+
 module.exports = {
   createIssue,
   getIssues,
   getIssue,
   updateIssue,
   getCritical,
+  getStatistics,
 };
