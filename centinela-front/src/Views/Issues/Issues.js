@@ -130,6 +130,11 @@ const Issues = () => {
       key: 'developer',
     },
     {
+      title: 'Key',
+      dataIndex: 'keyName',
+      key: 'keyName',
+    },
+    {
       title: 'Action',
       key: 'action',
       render: (text, issue) => (
