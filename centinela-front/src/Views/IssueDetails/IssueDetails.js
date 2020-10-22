@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Spin, Result, Button, Space, Tag, Alert, Typography } from 'antd';
+import { Spin, Result, Button, Space, Tag, Alert, Typography, message } from 'antd';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { useQuery, useMutation, queryCache } from 'react-query';
 
@@ -23,8 +23,8 @@ export const fetchIssue = async (id) => {
   return data;
 };
 
-export const patchIssue = async ({ values, id }) => {
-  const { data } = await api.patch(`/issues/${id}`, values);
+export const closeIssue = async ({ id }) => {
+  const { data } = await api.post(`/issues/${id}/close`);
   return data;
 };
 
@@ -33,11 +33,17 @@ const IssueDetails = () => {
   const history = useHistory();
   const [closeRecently, setCloseRecently] = useState(false);
   const { isLoading, data, error } = useQuery(id, fetchIssue);
-  const [mutate, { isLoading: loadingPatch, error: errorPatch }] = useMutation(patchIssue, {
+  const [mutate, { isLoading: loadingMutation, error: errorMutation }] = useMutation(closeIssue, {
     onSuccess: (data) => {
       queryCache.setQueryData(id, data);
     },
   });
+
+  React.useEffect(() => {
+    if (errorMutation) {
+      renderCloseError();
+    }
+  }, [errorMutation]);
 
   const getStatusTag = (status) => {
     if (status === 'open') {
@@ -63,9 +69,7 @@ const IssueDetails = () => {
   };
 
   const handleCloseIssue = () => {
-    const values = { ...data.data, status: 'close' };
-    delete values.id;
-    mutate({ values, id });
+    mutate({ id });
     setCloseRecently(true);
   };
 
@@ -83,6 +87,13 @@ const IssueDetails = () => {
       />
     );
   }
+
+  const renderCloseError = () => {
+    const {
+      response: { data },
+    } = errorMutation;
+    return message.error(data.message);
+  };
 
   const renderContent = () => {
     const { title, description, severity, status, developer } = data;
@@ -102,7 +113,7 @@ const IssueDetails = () => {
           <Developer>{developer || 'Not assigned.'}</Developer>
         </DeveloperContainer>
         {status === 'open' ? (
-          <Button type="primary" onClick={handleCloseIssue} loading={loadingPatch}>
+          <Button type="primary" onClick={handleCloseIssue} loading={loadingMutation}>
             Close Issue
           </Button>
         ) : closeRecently ? (
