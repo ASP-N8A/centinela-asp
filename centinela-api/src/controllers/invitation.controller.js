@@ -6,6 +6,7 @@ const { invitationService, organizationService } = require('../services');
 const { invitationEmailQueue } = require('../queue');
 const { parseAuthToken } = require('../utils/parseAuthToken');
 const logger = require('../config/logger');
+const config = require('../config/config');
 
 const createInvitation = catchAsync(async (req, res) => {
   const { authorization } = req.headers;
@@ -17,7 +18,7 @@ const createInvitation = catchAsync(async (req, res) => {
   const data = {
     to: req.body.email,
     subject: 'Invitation to join organization',
-    text: `Join our organization through the link: http://centinela-frontend-dev.s3-website-us-east-1.amazonaws.com/?company=${orgName}&token=${invitation._id}`,
+    text: `Join our organization through the link: ${config.domain}/?company=${orgName}&token=${invitation._id}`,
   };
   invitationEmailQueue.add(data);
   logger.info(`Invitation for ${req.body.email} created`);
