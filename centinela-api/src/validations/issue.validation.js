@@ -50,10 +50,17 @@ const getStatistics = {
   }),
 };
 
+const closeIssue = {
+  params: Joi.object().keys({
+    issueId: Joi.string().custom(objectId),
+  }),
+};
+
 module.exports = {
   createIssue,
   getIssues,
   getIssue,
   updateIssue,
   getStatistics,
+  closeIssue,
 };

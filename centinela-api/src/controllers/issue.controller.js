@@ -120,6 +120,16 @@ const getStatistics = catchAsync(async (req, res) => {
   res.send(result);
 });
 
+const closeIssue = catchAsync(async (req, res) => {
+  const { authorization } = req.headers;
+  const { org } = parseAuthToken(authorization);
+
+  const issue = await issueService.closeIssue(req.params.issueId, org);
+  logger.info(`Issue with Id ${req.params.issueId} closed!`);
+  res.send(issue);
+});
+
+
 module.exports = {
   createIssue,
   getIssues,
@@ -127,4 +137,5 @@ module.exports = {
   updateIssue,
   getCritical,
   getStatistics,
+  closeIssue,
 };

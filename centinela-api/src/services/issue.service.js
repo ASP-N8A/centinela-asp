@@ -71,7 +71,7 @@ const getCritical = async (orgId) => {
  * @param {Object} period
  * @param {Date} [period.dateFrom]
  * @param {number} [period.dateTo]
- * @param {*ObjetctId} orgId
+ * @param {ObjetctId} orgId
  */
 const queryStatistics = async (period, orgId) => {
   const Issue = getModelByTenant(orgId, 'Issue', IssueSchema);
@@ -84,6 +84,7 @@ const queryStatistics = async (period, orgId) => {
   };
   const total = await Issue.count(query);
   const severities = await Issue.aggregate([{ $match: query }, { $group: { _id: '$severity', count: { $sum: 1 } } }]);
+  severities.sort((a, b) => a._id - b._id);
   query = {
     ...query,
     status: 'close',
@@ -95,6 +96,24 @@ const queryStatistics = async (period, orgId) => {
   return { total, resolved, severities };
 };
 
+/**
+ *
+ * @param {ObjectId} issueId
+ * @param {ObjectId} orgId
+ */
+const closeIssue = async (issueId, orgId) => {
+  const issue = await getIssueById(issueId, orgId);
+
+  if (!issue) {
+    logger.info(`Issue with Id ${issueId} not found`);
+    throw new ApiError(httpStatus.NOT_FOUND, 'Issue not found');
+  }
+
+  Object.assign(issue, { status: 'close' });
+  await issue.save();
+  return issue;
+};
+
 module.exports = {
   createIssue,
   queryIssues,
@@ -102,4 +121,5 @@ module.exports = {
   updateIssueById,
   getCritical,
   queryStatistics,
+  closeIssue,
 };
