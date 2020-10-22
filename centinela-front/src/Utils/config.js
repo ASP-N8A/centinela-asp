@@ -1,1 +1,1 @@
-export const API_URL = 'http://centinela-prod.us-east-1.elasticbeanstalk.com/v1/';
+export const API_URL = 'http://centinelawebapitest-env.eba-d6mmujvp.us-east-1.elasticbeanstalk.com/v1/';
