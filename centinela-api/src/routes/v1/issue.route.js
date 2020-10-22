@@ -13,11 +13,15 @@ router
 
 router.route('/critical').get(validate(issueValidation.getIssues), issueController.getCritical);
 
-router.route('/statistics').get(validate(issueValidation.getStatistics), issueController.getStatistics);
+router.route('/statistics').get(auth('statistics'), validate(issueValidation.getStatistics), issueController.getStatistics);
 
 router
   .route('/:issueId')
   .get(auth('basic'), validate(issueValidation.getIssue), issueController.getIssue)
   .patch(auth('editIssue'), validate(issueValidation.updateIssue), issueController.updateIssue);
+
+  router
+  .route('/:issueId/close')
+  .post(auth('basic'), validate(issueValidation.closeIssue), issueController.closeIssue);
 
 module.exports = router;
